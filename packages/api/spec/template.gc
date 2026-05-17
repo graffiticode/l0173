@@ -1,27 +1,25 @@
-chart
-  title "Weekly performance"
-  subtitle "Revenue vs. forecast"
-  x-axis
-    type category
-    categories ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    {}
-  y-axis
-    type value
-    name "USD (thousands)"
-    {}
+chart title "Weekly performance"
+  x-axis type category
+    categories [
+      "Mon"
+      "Tue"
+      "Wed"
+      "Thu"
+      "Fri"
+      "Sat"
+      "Sun"
+    ] {}
+  y-axis type value
+    name "USD (thousands)" {}
   series [
-    bar
-      name "Revenue"
-      data [120, 200, 150, 80, 70, 110, 130]
-      color "blue-500"
-      {},
-    line
-      name "Forecast"
-      data [110, 180, 160, 90, 75, 105, 125]
-      color "amber-500"
-      smooth true
-      {}
-  ]
-  legend top
-  tooltip true
-  {}..
+    bar name "Revenue"
+      data [
+        120
+        200
+        150
+        80
+        70
+        110
+        130
+      ] color "blue-500" {}
+  ] {}..

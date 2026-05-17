@@ -1,0 +1,56 @@
+{
+  "id": "0173",
+  "description": "Graffiticode charting dialect. Compiles small declarative programs into Apache ECharts visualizations (bar, line, pie/donut/nightingale rose) and static HTML artifacts (data tables, KPI cards). Single-series constructors (bar, line, pie) double as complete charts; the `chart` wrapper combines multiple series on shared or dual y-axes. Right tool for analytics dashboards, report visualizations, and assessment-style data displays. Not the right tool for relational/network charts (graph, sankey, tree), interactive editing, or anything that needs external data fetching.",
+  "supported_item_types": [
+    "chart",
+    "table",
+    "kpi"
+  ],
+  "example_prompts": [
+    {
+      "prompt": "Create a bar chart of Q1–Q4 revenue with values 320, 450, 380, 510.",
+      "produces": "chart",
+      "notes": "Single-series sugar: a bare `bar` constructor at the top level compiles to a complete chart."
+    },
+    {
+      "prompt": "Show weekly visits as a smooth line chart for Mon–Sun with values 1200, 1340, 1500, 1450, 1700, 1850, 1900.",
+      "produces": "chart",
+      "notes": "Standalone `line smooth true ...` — minimal trend chart."
+    },
+    {
+      "prompt": "Donut chart of market share: A 40, B 35, C 25 — with the title \"Market share\".",
+      "produces": "chart",
+      "notes": "Donut = `pie` with `inner-radius`. Data is a list of {name, value} records."
+    },
+    {
+      "prompt": "Nightingale rose chart of weekday visits Mon=120, Tue=200, Wed=150, Thu=80, Fri=70, Sat=110, Sun=130.",
+      "produces": "chart",
+      "notes": "Rose = `pie` with `rose-type radius`. Per-slice values drive radius."
+    },
+    {
+      "prompt": "Combo chart with bars for Revenue [320, 450, 380, 510] and a line for Growth% [5, 12, -3, 8] over Q1–Q4 with dual y-axes.",
+      "produces": "chart",
+      "notes": "Multi-series with `y-axis-right` and `axis right` on the line — canonical dual-axis pattern."
+    },
+    {
+      "prompt": "Create a table of quarterly results with columns Quarter, Revenue, Growth and rows Q1 320 0.05, Q2 450 0.12, Q3 380 -0.03, Q4 510 0.08.",
+      "produces": "table",
+      "notes": "Static HTML table — exercises `headers`, `rows`, and the default striped/bordered styling."
+    },
+    {
+      "prompt": "KPI card showing monthly revenue $1,240,000 with a 12% increase, formatted as currency.",
+      "produces": "kpi",
+      "notes": "KPI auto-derives `deltaDirection` from the sign of `delta`; `format currency` formats via Intl.NumberFormat."
+    },
+    {
+      "prompt": "Bar chart in dark theme titled \"Sales\" with categories Q1–Q4 and values [320, 450, 380, 510], colored blue-500.",
+      "produces": "chart",
+      "notes": "Exercises Tailwind color resolution and theme propagation to the envelope."
+    },
+    {
+      "prompt": "Stacked bar chart with two series, Free [50, 70, 60] and Pro [120, 140, 130] over weeks 1–3, both stacked under group \"signups\".",
+      "produces": "chart",
+      "notes": "Two `bar` series with the same `stack` group inside a `chart` wrapper."
+    }
+  ]
+}

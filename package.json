@@ -1,0 +1,38 @@
+{
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/api",
+    "packages/app"
+  ],
+  "scripts": {
+    "update-lang-id": "find packages -type f -name \"*.js\" -o -name \"*.jsx\" -o -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.json\" -o -name \"*.md\" -o -name \"*.html\" | xargs grep -l \"0173\" | xargs sed -i '' 's/0173/0173/g'",
+    "build": "npm run -w packages/app build && npm run -w packages/api build && npm run build-static",
+    "build-static": "npm run -w packages/api build-lexicon; npm run -w packages/api build-spec; npm run -w packages/api build-instructions; npm run -w packages/api build-language-info",
+    "dev": "npm run -w packages/api dev",
+    "start": "npm run -w packages/api start",
+    "lint": "npm run -w packages/api lint; npm run -w packages/app lint",
+    "lint:fix": "npm run -w packages/api lint:fix; npm run -w packages/app lint:fix",
+    "pack": "rm *.tgz; npm -w packages/app pack",
+    "publish": "npm -w packages/app publish --access=public",
+    "gcp:build": "gcloud builds submit --project graffiticode --config cloudbuild.yaml --substitutions=COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo 'latest')",
+    "gcp:deploy": "gcloud run deploy l0173 --project graffiticode --source . --port 50173 --region us-central1 --platform managed --allow-unauthenticated",
+    "gcp:logs": "gcloud run logs read l0173 --project graffiticode --region us-central1"
+  },
+  "devDependencies": {
+    "eslint": "^8.44.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^16.0.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "jest": "^29.6.1"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "<rootDir>/packages/",
+      "<rootDir>/node_modules/"
+    ]
+  },
+  "dependencies": {
+  }
+}

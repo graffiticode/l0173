@@ -259,6 +259,33 @@ describe("L0173 / axis options", () => {
     expect(data.option.series[0].center).toEqual(["60%", "50%"]);
   });
 
+  it("left legend with title stacks below the title (keeps left position)", async () => {
+    const { errors, data } = await compileSource(
+      `pie title "Customer Segments" data [{name: "A" value: 1}] legend left {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.legend).toEqual({ left: 0, orient: "vertical", top: 30 });
+    expect(data.option.series[0].center).toEqual(["60%", "50%"]);
+  });
+
+  it("right legend with title stacks below the title (keeps right position)", async () => {
+    const { errors, data } = await compileSource(
+      `pie title "Customer Segments" data [{name: "A" value: 1}] legend right {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.legend).toEqual({ right: 0, orient: "vertical", top: 30 });
+    expect(data.option.series[0].center).toEqual(["40%", "50%"]);
+  });
+
+  it("bottom legend with title does NOT get bumped (already clear of title)", async () => {
+    const { errors, data } = await compileSource(
+      `pie title "Customer Segments" data [{name: "A" value: 1}] legend bottom {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.legend.top).toBeUndefined();
+    expect(data.option.legend.bottom).toBe(0);
+  });
+
   it("pie shifts left when legend is on the right", async () => {
     const { errors, data } = await compileSource(
       `pie data [{name: "A" value: 1}] legend right {}..`

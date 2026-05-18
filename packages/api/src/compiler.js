@@ -187,16 +187,24 @@ function assembleEnvelope(record, seriesType) {
   let legendPosition;
   if (chartLevel.legend !== undefined) {
     const legend = renderLegend(chartLevel.legend);
-    // When the legend is at the top and there's a title, ECharts doesn't
-    // auto-stack them — they both default to top: 5 and collide. Push
-    // the legend below the title baseline (more if a subtitle is set).
-    if (legend && legend.top === 0 && option.title) {
+
+    // Detect position from the anchor renderLegend set, *before* we
+    // mutate `top` for title-stacking. Left/right take precedence over
+    // top because vertical side legends are still horizontally anchored
+    // even after we push them below the title.
+    if (legend?.left !== undefined) legendPosition = "left";
+    else if (legend?.right !== undefined) legendPosition = "right";
+    else if (legend?.bottom !== undefined) legendPosition = "bottom";
+    else if (legend?.top !== undefined) legendPosition = "top";
+
+    // ECharts places any legend without an explicit `bottom` anchor at
+    // the top of the canvas (top-default). If there's a title, that
+    // means they collide — bump the legend down to clear the title.
+    // (Applies equally to `legend top`, `legend left`, `legend right`,
+    // and the `legend true` shorthand.)
+    if (legend && option.title && legend.bottom === undefined) {
       legend.top = chartLevel.subtitle !== undefined ? 50 : 30;
     }
-    if (legend?.top !== undefined) legendPosition = "top";
-    else if (legend?.bottom !== undefined) legendPosition = "bottom";
-    else if (legend?.left !== undefined) legendPosition = "left";
-    else if (legend?.right !== undefined) legendPosition = "right";
     option.legend = legend;
   }
   if (chartLevel.tooltip !== undefined) {

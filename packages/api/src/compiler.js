@@ -226,7 +226,10 @@ function assembleEnvelope(record, seriesType) {
 }
 
 function renderLegend(v) {
-  if (v === true) return {};
+  // `legend true` is shorthand for "show the legend in its default
+  // position" — and ECharts' default is top-center. Make that explicit
+  // as `{top: 0}` so the title/legend stacking logic catches it.
+  if (v === true) return { top: 0 };
   if (typeof v === "string") return { [v]: 0 };
   if (v && typeof v === "object") return v;
   return undefined;

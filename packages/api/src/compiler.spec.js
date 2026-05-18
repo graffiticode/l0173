@@ -222,6 +222,18 @@ describe("L0173 / axis options", () => {
     expect(data.option.legend.top).toBe(0);
   });
 
+  it("`legend true` with a title also stacks below the title", async () => {
+    // `legend true` is shorthand for the default position (top), so the
+    // stacking logic should treat it like `legend top`.
+    const { errors, data } = await compileSource(
+      `pie title "Customer Segments" data [{name: "A" value: 1}, {name: "B" value: 2}] legend true {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.legend.top).toBe(30);
+    // And the pie center should shift down too.
+    expect(data.option.series[0].center).toEqual(["50%", "60%"]);
+  });
+
   it("pie pushes its center down when legend is at top (room for slice callouts)", async () => {
     const { errors, data } = await compileSource(
       `pie title "Portfolio" legend top data [{name: "A" value: 1}, {name: "B" value: 2}] {}..`

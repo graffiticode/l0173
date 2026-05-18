@@ -185,7 +185,14 @@ function assembleEnvelope(record, seriesType) {
     if (chartLevel.subtitle !== undefined) option.title.subtext = chartLevel.subtitle;
   }
   if (chartLevel.legend !== undefined) {
-    option.legend = renderLegend(chartLevel.legend);
+    const legend = renderLegend(chartLevel.legend);
+    // When the legend is at the top and there's a title, ECharts doesn't
+    // auto-stack them — they both default to top: 5 and collide. Push
+    // the legend below the title baseline (more if a subtitle is set).
+    if (legend && legend.top === 0 && option.title) {
+      legend.top = chartLevel.subtitle !== undefined ? 50 : 30;
+    }
+    option.legend = legend;
   }
   if (chartLevel.tooltip !== undefined) {
     option.tooltip = renderTooltip(chartLevel.tooltip);

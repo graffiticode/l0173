@@ -150,6 +150,28 @@ describe("L0173 / axis options", () => {
     expect(errors).toBeNull();
     expect(data.option.grid.containLabel).toBe(true);
   });
+
+  it("top legend with title stacks below the title (no overlap)", async () => {
+    const { errors, data } = await compileSource(
+      `bar title "Revenue mix" legend top data [10, 20] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.legend.top).toBe(30);
+  });
+
+  it("top legend with title and subtitle leaves extra room", async () => {
+    const { errors, data } = await compileSource(
+      `bar title "Revenue mix" subtitle "Q1 results" legend top data [10, 20] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.legend.top).toBe(50);
+  });
+
+  it("top legend without title stays flush to the top", async () => {
+    const { errors, data } = await compileSource(`bar legend top data [10, 20] {}..`);
+    expect(errors).toBeNull();
+    expect(data.option.legend.top).toBe(0);
+  });
 });
 
 describe("L0173 / chart wrapper (multi-series)", () => {

@@ -76,6 +76,25 @@ kpi 1240000
 Not `kpi value 1240000 ...` — there is no `value` setter (the surface
 keyword `value` is reserved as an axis-type tag).
 
+## ECharts idioms that don't translate to L0173
+
+L0173 is **not** ECharts JSON. It's a prefix-applied DSL with chainable
+arity-2 attribute setters that end in `{}`. Several reflexes from
+writing ECharts config will fail. Map them to L0173 keywords first.
+
+| What you might write (ECharts reflex) | What L0173 expects |
+| :--- | :--- |
+| `show true` | There is no `show` keyword. Use the *intent-specific* setter: `label-show true` for data labels on points; `legend true` to enable the legend; `tooltip true` to enable tooltips. |
+| `label show true` (decomposing `label`) | `label-show true` — it's a single hyphenated keyword. |
+| `label { show: true position: "top" }` (record-literal options) | `label-show true` only. Per-point label position is not exposed in v1. |
+| `option { title: { text: "..." } ... }` (JSON-literal config) | Use the chainable setters: `title "..."`, `subtitle "..."`, etc. No `option` keyword. |
+| `xAxis { type: "category" data: [...] }` (JSON-literal axis) | `x-axis type category categories [...] {}` — the axis is its own chainable block. |
+| `series: [{ type: "bar", data: [...] }]` (object-literal series) | Use constructors: `series [bar data [...] {}]`. |
+| `name: "..." value: 40` keys ad-hoc on a series | On a series, `name "..."` sets the legend name and `data [...]` is the values. `{ name, value }` records are only used as elements *inside* `pie`'s `data` list. |
+| `legend: { orient: "horizontal" position: "top" }` | `legend top` (bare tag). Allowed tags: `top`, `bottom`, `left`, `right`, `inside`. Or `legend true` for default. |
+| `itemStyle: { color: "blue" }` | `color "blue-500"` — Tailwind token preferred; hex also works. |
+| `valueAxis` / `categoryAxis` keywords | Use `type value` / `type category` *inside* `y-axis`/`x-axis`. |
+
 ## Common pitfalls
 
 - **Forgetting the inner `{}`** for an x-axis / y-axis / series block.
@@ -89,6 +108,9 @@ keyword `value` is reserved as an axis-type tag).
 - **Wrong format tag** — KPI `format` accepts only `currency`,
   `percent`, `number`, `compact`. Don't use `"USD"` or `"$"`.
 - **Wrong rose-type** — only `radius` and `area`. Don't use `nightingale`.
+- **Inventing keywords** — every chainable setter is documented in
+  `spec.md`. If you can't find it there, it doesn't exist; pick the
+  closest documented setter instead of guessing.
 
 ## Out of scope (do not attempt in L0173)
 

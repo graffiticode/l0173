@@ -6,28 +6,26 @@ composing a `create_item` prompt or an `update_item` modification.
 
 ## Overview
 
-L0173 is a declarative dialect for **charts, tables, and KPI cards**.
-Input is a natural-language description of a visualization — what kind
-of chart, the data series, axis labels, theming — and output is an L0173
-program that compiles to one of four artifact envelopes the renderer
-knows how to draw: an Apache ECharts canvas (bar / line / pie / donut /
-nightingale rose / multi-series compositions), a static HTML data
-table, or a single-value KPI card.
+L0173 is a declarative dialect for **charts**. Input is a natural-language
+description of a visualization — what kind of chart, the data series,
+axis labels, theming — and output is an L0173 program that compiles to
+an Apache ECharts canvas: a bar, line, or pie chart (including donut
+and nightingale-rose variants), used standalone or composed into a
+multi-series / dual-axis layout via the `chart` wrapper.
 
-The right tool for analytics dashboards, report visualizations, and
-assessment-style data displays. Not the right tool for relational
-charts (graph / sankey / tree / treemap / sunburst), interactive
-editing, formulas, or anything that needs external data fetching —
-those belong in other dialects.
+The right tool for analytics dashboards and report visualizations. Not
+the right tool for relational charts (graph / sankey / tree / treemap /
+sunburst), interactive editing, formulas, tabular data renderings, KPI
+cards, or anything that needs external data fetching — those belong
+in other dialects.
 
-In scope (v1): bar, line, pie (with donut and nightingale-rose variants
-via attributes); multi-series overlays on shared or dual y-axes; static
-data tables; KPI cards with auto-derived delta direction and
-`Intl.NumberFormat` formatting; Tailwind v3 color tokens and theme
-modes. Out of scope (v1): scatter / radar / gauge / heatmap / boxplot /
-candlestick / funnel / sparklines / table editing — these slot into
-the same compiler pattern in future versions but aren't implemented
-yet.
+In scope (v1): bar, line, pie (with donut and nightingale-rose
+variants via attributes); multi-series overlays on shared or dual
+y-axes; Tailwind v3 color tokens and theme modes. Out of scope (v1):
+scatter / radar / gauge / heatmap / boxplot / candlestick / funnel /
+network charts / tables / KPI cards — these slot into the same
+compiler pattern in future versions or sibling dialects but aren't
+in L0173 v1.
 
 ## What L0173 can do
 
@@ -41,11 +39,6 @@ yet.
   legend and tooltips.
 - **Dual y-axis** — two y-axes (left + right) so series with different
   scales render legibly together.
-- **Tables** — static HTML tables with headers, captions, per-column
-  alignment, striped and bordered styles.
-- **KPI cards** — single-value cards with label, delta indicator
-  (auto-coloured for up / down / neutral), and `Intl.NumberFormat`
-  formatting (currency / percent / compact / number).
 - **Theming** — `theme dark | light` for the surrounding card and chart
   chrome; named ECharts palettes via `palette "vintage"` etc.
 - **Tailwind color tokens** — `color "blue-500"` resolves to the
@@ -58,11 +51,9 @@ yet.
 - No `scatter`, `radar`, `gauge`, `heatmap`, `boxplot`, `candlestick`,
   `funnel` series — these are easy adds in a future v2 but aren't in
   v1.
-- No table cell formulas / scoring (use L0166 for assessment-style
-  spreadsheets).
+- No tables, KPI cards, or other non-ECharts artifact types in v1.
+  Use a different dialect or wait for v2.
 - No external data — the program receives no HTTP/database access.
-- No KPI sparklines yet — KPI card v1 is value + label + delta + format
-  + caption.
 
 ## Quick start
 
@@ -104,30 +95,6 @@ pie
   {}..
 ```
 
-A table:
-```
-table
-  headers ["Quarter", "Revenue", "Growth"]
-  rows [
-    ["Q1", 320, 0.05]
-    ["Q2", 450, 0.12]
-    ["Q3", 380, -0.03]
-    ["Q4", 510, 0.08]
-  ]
-  column-align [left right right]
-  {}..
-```
-
-A KPI card (value is the first positional argument):
-```
-kpi 1240000
-  label "Monthly revenue"
-  delta 0.12
-  format currency
-  caption "vs. previous month"
-  {}..
-```
-
 ## Theming
 
 Wrap any program with `theme dark` or `theme light` to control the
@@ -142,8 +109,7 @@ chart
 
 ## Colors
 
-The `color` attribute on a series, and the `color` attribute on a KPI
-card, accept:
+The `color` attribute on a series accepts:
 
 - A Tailwind v3 token: `"blue-500"`, `"amber-400"`, `"emerald-600"`.
 - A hex value: `"#3b82f6"`.

@@ -3,9 +3,10 @@
 
 This specification documents dialect-specific functions available in
 the **L0173** language of Graffiticode. L0173 is the *charting* dialect:
-it compiles programs into chart, table, and KPI-card artifacts that
-render via Apache ECharts (for charts) or plain HTML (for tables and
-KPI cards).
+it compiles programs into Apache ECharts visualizations — bar, line,
+and pie charts (with donut and nightingale-rose variants), used
+standalone or composed into multi-series and dual-axis layouts via
+the `chart` wrapper.
 
 The core language specification, including syntax, semantics, and the
 base library, can be found here:
@@ -19,8 +20,6 @@ base library, can be found here:
 | `bar` | 1 | ECharts bar series | Vertical bar chart. Standalone usage produces a single-series chart. |
 | `line` | 1 | ECharts line series | Line chart; `smooth true` softens corners; `area-style true` fills under the curve. |
 | `pie` | 1 | ECharts pie series | Pie chart. `inner-radius "60%"` → donut. `rose-type radius` / `area` → nightingale rose. |
-| `table` | 1 | HTML `<table>` | Static data table with optional headers, caption, and per-column alignment. |
-| `kpi` | 1 | HTML card | Single-value KPI card with optional delta, format, and caption. |
 
 ## Chart-level options
 
@@ -85,32 +84,6 @@ These setters chain inside an `x-axis`, `y-axis`, or `y-axis-right` block.
 | `interval` | number | Tick spacing. |
 | `boundary-gap` | boolean | Whether to add padding at axis ends. |
 | `inverse` | boolean | Reverse the axis. |
-
-## Table options
-
-| Setter | Value | Effect |
-| :--- | :--- | :--- |
-| `headers` | list of strings | Column header row. |
-| `rows` | list of lists | Data rows. |
-| `caption` | string | Table caption (rendered below). |
-| `column-align` | list of tags | Per-column alignment: `left`, `center`, `right`. |
-| `striped` | boolean | Alternating row backgrounds (default `true`). |
-| `bordered` | boolean | Cell borders (default `true`). |
-
-## KPI options
-
-`kpi` is arity 2 — the **value** is the primary positional argument
-(not a setter), so a card always starts `kpi <value> ...`. The setters
-below chain inside the second argument.
-
-| Setter | Value | Effect |
-| :--- | :--- | :--- |
-| `label` | string | Caption above the value. |
-| `delta` | number | Change vs. comparison period. Sign determines direction unless `delta-direction` is set. |
-| `delta-direction` | tag (`up` \| `down` \| `neutral`) | Override the auto-derived direction. |
-| `format` | tag (`currency` \| `percent` \| `number` \| `compact`) | Number formatting via `Intl.NumberFormat`. |
-| `caption` | string | Small caption below the delta. |
-| `color` | string | Background color (Tailwind token or hex). |
 
 ## Function Reference
 
@@ -201,41 +174,6 @@ pie
   {}
 ```
 
-### table
-
-Static HTML data table.
-
-```
-table
-  headers ["Quarter", "Revenue", "Growth"]
-  rows [
-    ["Q1", 320, 0.05]
-    ["Q2", 450, 0.12]
-    ["Q3", 380, -0.03]
-    ["Q4", 510, 0.08]
-  ]
-  column-align [left right right]
-  caption "Quarterly results"
-  {}
-```
-
-### kpi
-
-Single-value KPI card. The value is the first positional argument.
-
-```
-kpi 1240000
-  label "Monthly revenue"
-  delta 0.12
-  format currency
-  caption "vs. previous month"
-  {}
-```
-
-The delta direction is derived from the sign of `delta` (`up` for
-positive, `down` for negative, `neutral` for zero). Override with
-`delta-direction up | down | neutral`.
-
 ## Dual y-axis
 
 To plot two series with different scales, declare both `y-axis` (left)
@@ -288,12 +226,3 @@ pie
   {}..
 ```
 
-KPI card:
-```
-kpi 0.245
-  label "Click-through rate"
-  delta 0.012
-  format percent
-  caption "Last 7 days"
-  {}..
-```

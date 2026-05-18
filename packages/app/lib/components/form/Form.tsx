@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 
 import { ThemeToggle } from "./ThemeToggle";
 import { EChart } from "./EChart";
-import { DataTable } from "./DataTable";
-import { KpiCard } from "./KpiCard";
 
 function classNames(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
@@ -48,32 +46,6 @@ function render({ state, theme }: { state: any; theme: string | undefined }) {
           background={data.background}
           width={data.width}
           height={data.height}
-        />
-      );
-    case "table":
-      return (
-        <DataTable
-          headers={data.headers}
-          rows={data.rows}
-          caption={data.caption}
-          title={data.title}
-          columnAlign={data.columnAlign}
-          striped={data.striped}
-          bordered={data.bordered}
-          theme={theme as "dark" | "light" | undefined}
-        />
-      );
-    case "kpi":
-      return (
-        <KpiCard
-          value={data.value}
-          label={data.label}
-          delta={data.delta}
-          deltaDirection={data.deltaDirection}
-          format={data.format}
-          caption={data.caption}
-          color={data.color}
-          theme={theme as "dark" | "light" | undefined}
         />
       );
     default:

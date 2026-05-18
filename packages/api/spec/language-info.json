@@ -1,10 +1,8 @@
 {
   "id": "0173",
-  "description": "Graffiticode charting dialect. Compiles small declarative programs into Apache ECharts visualizations (bar, line, pie/donut/nightingale rose) and static HTML artifacts (data tables, KPI cards). Single-series constructors (bar, line, pie) double as complete charts; the `chart` wrapper combines multiple series on shared or dual y-axes. Right tool for analytics dashboards, report visualizations, and assessment-style data displays. Not the right tool for relational/network charts (graph, sankey, tree), interactive editing, or anything that needs external data fetching.",
+  "description": "Graffiticode charting dialect. Compiles small declarative programs into Apache ECharts visualizations: bar, line, and pie charts (including donut and nightingale-rose variants via attributes). Single-series constructors (bar, line, pie) double as complete charts; the `chart` wrapper combines multiple series on shared or dual y-axes. Right tool for analytics dashboards and report visualizations. Not the right tool for tabular data renderings, KPI cards, relational/network charts, interactive editing, or anything that needs external data fetching.",
   "supported_item_types": [
-    "chart",
-    "table",
-    "kpi"
+    "chart"
   ],
   "example_prompts": [
     {
@@ -31,16 +29,6 @@
       "prompt": "Combo chart with bars for Revenue [320, 450, 380, 510] and a line for Growth% [5, 12, -3, 8] over Q1–Q4 with dual y-axes.",
       "produces": "chart",
       "notes": "Multi-series with `y-axis-right` and `axis right` on the line — canonical dual-axis pattern."
-    },
-    {
-      "prompt": "Create a table of quarterly results with columns Quarter, Revenue, Growth and rows Q1 320 0.05, Q2 450 0.12, Q3 380 -0.03, Q4 510 0.08.",
-      "produces": "table",
-      "notes": "Static HTML table — exercises `headers`, `rows`, and the default striped/bordered styling."
-    },
-    {
-      "prompt": "KPI card showing monthly revenue $1,240,000 with a 12% increase, formatted as currency.",
-      "produces": "kpi",
-      "notes": "KPI auto-derives `deltaDirection` from the sign of `delta`; `format currency` formats via Intl.NumberFormat."
     },
     {
       "prompt": "Bar chart in dark theme titled \"Sales\" with categories Q1–Q4 and values [320, 450, 380, 510], colored blue-500.",

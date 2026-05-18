@@ -102,7 +102,7 @@ export class Transformer extends BasisTransformer {}
 // tokens to hex.
 
 const CONSTRUCTOR_METHODS = new Set([
-  "CHART", "BAR", "LINE", "PIE", "TABLE", "KPI",
+  "CHART", "BAR", "LINE", "PIE",
 ]);
 
 for (const [method, field] of Object.entries(OPT_SETTER_FIELDS)) {
@@ -331,58 +331,6 @@ for (const t of ["bar", "line", "pie"]) {
   };
 }
 
-// `table` — emits an HTML-renderable table envelope. Read headers,
-// rows, caption, columnAlign, striped, bordered out of the inner record.
-Checker.prototype.TABLE = function (node, options, resume) {
-  this.visit(node.elts[0], options, (e0) => {
-    resume(e0 || [], node);
-  });
-};
-
-Transformer.prototype.TABLE = function (node, options, resume) {
-  this.visit(node.elts[0], options, (e0, v0) => {
-    const r = v0 || {};
-    const out = { type: "table" };
-    if (r.headers !== undefined) out.headers = r.headers;
-    if (r.rows !== undefined) out.rows = r.rows;
-    if (r.caption !== undefined) out.caption = r.caption;
-    if (r.columnAlign !== undefined) out.columnAlign = r.columnAlign;
-    if (r.striped !== undefined) out.striped = r.striped;
-    if (r.bordered !== undefined) out.bordered = r.bordered;
-    if (r.theme !== undefined) out.theme = r.theme;
-    if (r.title !== undefined) out.title = r.title;
-    resume([], out);
-  });
-};
-
-// `kpi` — emits a card envelope. Arity-2: arg 0 is the value (a number
-// or string), arg 1 is the chained-attribute record. Auto-derives
-// deltaDirection from the sign of delta if not explicitly set.
-Checker.prototype.KPI = function (node, options, resume) {
-  visitArity2.call(this, node, options, resume);
-};
-
-Transformer.prototype.KPI = function (node, options, resume) {
-  this.visit(node.elts[0], options, (e0, v0) => {
-    this.visit(node.elts[1], options, (e1, v1) => {
-      const r = v1 || {};
-      const out = { type: "kpi", value: v0 };
-      if (r.label !== undefined) out.label = r.label;
-      if (r.delta !== undefined) out.delta = r.delta;
-      if (r.deltaDirection !== undefined) {
-        out.deltaDirection = r.deltaDirection;
-      } else if (typeof r.delta === "number") {
-        out.deltaDirection = r.delta > 0 ? "up" : r.delta < 0 ? "down" : "neutral";
-      }
-      if (r.format !== undefined) out.format = r.format;
-      if (r.caption !== undefined) out.caption = r.caption;
-      if (r.color !== undefined) out.color = resolveColor(extractValue(r.color));
-      if (r.theme !== undefined) out.theme = r.theme;
-      resume([], out);
-    });
-  });
-};
-
 // ---------------------------------------------------------------------------
 // PROG — top-level assembly
 // ---------------------------------------------------------------------------
@@ -398,14 +346,14 @@ Transformer.prototype.PROG = function (node, options, resume) {
       return;
     }
 
-    // Already an envelope — pass through.
-    if (last.type === "chart" || last.type === "table" || last.type === "kpi") {
+    // Already a chart envelope — pass through.
+    if (last.type === "chart") {
       resume(e0, { ...data, ...last });
       return;
     }
 
     // Bare series at top level (no `chart` wrapper) — auto-wrap.
-    if (SERIES_TYPE_NAMES.includes(last.type) && last.type !== "table" && last.type !== "kpi") {
+    if (SERIES_TYPE_NAMES.includes(last.type)) {
       const { type, ...rest } = last;
       resume(e0, { ...data, ...assembleEnvelope(rest, type) });
       return;

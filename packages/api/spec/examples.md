@@ -59,69 +59,33 @@ produce a valid L0173 program.
 44. Pie chart with legend on the right side, showing browser share.
 45. Donut chart with caption-style label (use label-show true) for each slice.
 
-## Category 4: Tables (46–60)
+## Category 4: Multi-series and dual axis (46–60)
 
-46. Create a table with headers ["Quarter", "Revenue", "Growth"] and rows for Q1 320 0.05, Q2 450 0.12, Q3 380 -0.03, Q4 510 0.08.
-47. Table of top 5 customers by revenue, columns Name, Region, Revenue, Status.
-48. Table with right-aligned numeric columns: Name (left), Amount (right), Date (left).
-49. Simple two-column table: Country and Population, six rows.
-50. Table with caption "Quarterly results" below the data.
-51. Table without striped rows: pass `striped false`.
-52. Table without borders: pass `bordered false`.
-53. Three-column table with explicit column-align list [left, right, right].
-54. Table with mixed numeric and string cells; the renderer stringifies non-string values.
-55. Empty-rows table with only headers, for an empty-state demo.
-56. Table with a title above and a caption below.
-57. Table titled "Inventory" with columns SKU, Name, Qty, Price.
-58. Table with 10 rows of sales by region.
-59. Table with single-row footer-style summary: ["Total", "", 1000].
-60. Table comparing two scenarios A and B across five metrics; columns Metric, A, B.
+46. Combo chart with bars for Revenue and a line for Forecast on the same axes over Q1–Q4.
+47. Bar + line combo where the line is bound to a right-side y-axis (different scale).
+48. Dual-axis chart: bars for Sales (USD) on left axis, line for Growth% on right axis.
+49. Multi-series line chart with three lines: Actual, Budget, Forecast over months Jan–Dec.
+50. Stacked bar chart with three series: Free, Pro, Enterprise sign-ups by week.
+51. Bar + line dual-axis: Revenue bars on left in blue-500, Conversion line on right in amber-500, with legend top.
+52. Two bar series side-by-side: 2024 vs 2025 revenue by quarter.
+53. Line chart with smooth=true for Predicted and step start for Actual.
+54. Chart wrapper with title, subtitle, and series list of two bars and one line.
+55. Combo chart titled "Q4 Performance" with dual y-axis named "USD" and "% growth", legend at the top.
+56. Multi-series bar with stack name "revenue" so the two series stack.
+57. Combo chart in dark theme: bars and lines with legible Tailwind colors.
+58. Multi-series chart with bar-width 16 and symbol-size 6 on the line.
+59. Combo chart with tooltip true and legend bottom.
+60. Two lines, one in sky-500 and another in rose-500, on the same axes.
 
-## Category 5: KPI cards (61–75)
+## Category 5: Theming and palettes (61–70)
 
-61. Create a KPI card showing monthly revenue $1,240,000 with a 12% increase, formatted as currency. (Use `kpi 1240000 label "Monthly revenue" delta 0.12 format currency {}..` — value is positional.)
-62. KPI card for click-through rate 24.5% with a 1.2% increase, format percent.
-63. KPI card for active users 18,450 with no delta.
-64. KPI card "Conversion rate" value 0.034 delta 0.002 format percent caption "Last 30 days".
-65. KPI card "Total visits" value 1234567 format compact caption "This year".
-66. KPI card with a negative delta -0.05 — direction should be down (red).
-67. KPI card with explicit `delta-direction neutral` even when delta is positive.
-68. KPI card for inventory units 4,200 format number with caption "in warehouse".
-69. KPI card "ARR" $4.2M, change +12%, format currency. (Use compact-currency in caption text; format compact won't show $.)
-70. KPI in dark theme: revenue $890,000, delta +0.08, format currency.
-71. KPI card with a background color amber-100 and label "Pending tasks" value 23.
-72. KPI card showing churn rate 0.08, delta -0.012, format percent.
-73. KPI card with format currency and a long label that wraps if needed.
-74. KPI card with a 0 delta — direction neutral.
-75. KPI card "Net Promoter Score" value 64 format number, no delta.
-
-## Category 6: Multi-series and dual axis (76–90)
-
-76. Combo chart with bars for Revenue and a line for Forecast on the same axes over Q1–Q4.
-77. Bar + line combo where the line is bound to a right-side y-axis (different scale).
-78. Dual-axis chart: bars for Sales (USD) on left axis, line for Growth% on right axis.
-79. Multi-series line chart with three lines: Actual, Budget, Forecast over months Jan–Dec.
-80. Stacked bar chart with three series: Free, Pro, Enterprise sign-ups by week.
-81. Bar + line dual-axis: Revenue bars on left in blue-500, Conversion line on right in amber-500, with legend top.
-82. Two bar series side-by-side: 2024 vs 2025 revenue by quarter.
-83. Line chart with smooth=true for Predicted and step start for Actual.
-84. Chart wrapper with title, subtitle, and series list of two bars and one line.
-85. Combo chart titled "Q4 Performance" with dual y-axis named "USD" and "% growth", legend at the top.
-86. Multi-series bar with stack name "revenue" so the two series stack.
-87. Combo chart in dark theme: bars and lines with legible Tailwind colors.
-88. Multi-series chart with bar-width 16 and symbol-size 6 on the line.
-89. Combo chart with tooltip true and legend bottom.
-90. Two lines, one in sky-500 and another in rose-500, on the same axes.
-
-## Category 7: Theming and palettes (91–100)
-
-91. Bar chart in dark theme with color blue-500.
-92. Pie chart in dark theme with title.
-93. Line chart with palette "vintage".
-94. Bar chart with palette "westeros".
-95. Multi-series chart with theme dark and palette "essos".
-96. Combo chart with background color slate-900 and theme dark.
-97. Table in dark theme.
-98. KPI card in dark theme.
-99. Bar chart with width 800 and height 400.
-100. Multi-series chart with animation false (no entry animations).
+61. Bar chart in dark theme with color blue-500.
+62. Pie chart in dark theme with title.
+63. Line chart with palette "vintage".
+64. Bar chart with palette "westeros".
+65. Multi-series chart with theme dark and palette "essos".
+66. Combo chart with background color slate-900 and theme dark.
+67. Bar chart with width 800 and height 400.
+68. Multi-series chart with animation false (no entry animations).
+69. Donut chart in dark theme with inner-radius "60%" and a top legend.
+70. Smooth line chart with palette "vintage" and a subtle background slate-900.

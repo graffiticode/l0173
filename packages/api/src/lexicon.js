@@ -10,23 +10,13 @@ const fn1 = (name) => ({ tk: 1, name, cls: "function", length: 1, arity: 1 });
 const fn2 = (name) => ({ tk: 1, name, cls: "function", length: 2, arity: 2 });
 const tag = () => ({ tk: 22, name: "TAG", cls: "val", length: 0, arity: 0 });
 
-// Series constructors. Most are arity 1 — they take one record built
-// up via chained arity-2 attribute setters terminating in `{}`.
+// Series constructors. Each is arity 1 — takes one record built up via
+// chained arity-2 attribute setters terminating in `{}`.
 //
 // `bar` / `line` / `pie` produce ECharts series records and are
 // assembled into a full chart by the `chart` wrapper or by PROG when
 // used standalone.
-//
-// `table` is arity 1; its inner record carries headers / rows /
-// caption / column-align / striped / bordered.
-//
-// `kpi` is arity 2 with the value as the primary arg:
-//   `kpi 1240000 label "Monthly revenue" format currency {}`
-// so the surface `value` keyword can stay available as an axis-type
-// tag without conflicting with a setter.
-const SERIES_TYPES_ARITY_1 = ["bar", "line", "pie", "table"];
-const SERIES_TYPES_ARITY_2 = ["kpi"];
-const SERIES_TYPES = [...SERIES_TYPES_ARITY_1, ...SERIES_TYPES_ARITY_2];
+const SERIES_TYPES = ["bar", "line", "pie"];
 
 // All chainable arity-2 setters in one map: METHOD → output field.
 // Surface keys are derived from METHOD via lowercase + underscore→dash
@@ -78,21 +68,6 @@ const OPT_SETTERS = {
   BOUNDARY_GAP:    "boundaryGap",
   INVERSE:         "inverse",
 
-  // Table options.
-  HEADERS:         "headers",
-  ROWS:            "rows",
-  CAPTION:         "caption",
-  COLUMN_ALIGN:    "columnAlign",
-  STRIPED:         "striped",
-  BORDERED:        "bordered",
-
-  // KPI options. (KPI is arity 2 with value as the primary arg, so
-  // there's no `value` setter — `value` stays available as an axis-type
-  // tag.)
-  LABEL:           "label",
-  DELTA:           "delta",
-  DELTA_DIRECTION: "deltaDirection",
-  FORMAT:          "format",
 };
 
 // METHOD → surface keyword. Convert UPPER_SNAKE → kebab-case.
@@ -114,8 +89,6 @@ const ENUM_TAGS = {
   SYMBOL:          ["circle", "rect", "triangle", "diamond", "pin", "arrow", "none"],
   AXIS:            ["left", "right"],
   ROSE_TYPE:       ["radius", "area"],
-  FORMAT:          ["currency", "percent", "number", "compact"],
-  DELTA_DIRECTION: ["up", "down", "neutral"],
   LABEL_POSITION:  ["top", "inside", "bottom", "inside-top", "inside-bottom"],
 };
 
@@ -134,8 +107,7 @@ export const lexicon = {
   "chart":          fn1("CHART"),
 
   // Series constructors.
-  ...Object.fromEntries(SERIES_TYPES_ARITY_1.map((s) => [s, fn1(s.toUpperCase())])),
-  ...Object.fromEntries(SERIES_TYPES_ARITY_2.map((s) => [s, fn2(s.toUpperCase())])),
+  ...Object.fromEntries(SERIES_TYPES.map((s) => [s, fn1(s.toUpperCase())])),
 
   // All chainable arity-2 setters.
   ...Object.fromEntries(

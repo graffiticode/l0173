@@ -1,17 +1,15 @@
 {
   "id": "0173",
-  "summary": "Graffiticode charting dialect — compiles to Apache ECharts (bar / line / pie+donut+rose), plus static HTML tables and KPI cards.",
+  "summary": "Graffiticode charting dialect — compiles to Apache ECharts (bar / line / pie + donut + nightingale-rose), single-series or composed via the `chart` wrapper.",
   "in_scope": [
     "Bar, line, and pie chart series (pie includes donut via inner-radius and nightingale rose via rose-type)",
     "Multi-series compositions and dual y-axis layouts via the `chart` wrapper",
-    "Static data tables with optional headers, captions, and per-column alignment",
-    "KPI cards with value, label, delta (auto-coloured up/down/neutral), Intl.NumberFormat formatting, optional caption",
     "Theming (dark / light), named ECharts color palettes, Tailwind v3 color tokens resolved to hex at compile time"
   ],
   "out_of_scope": [
+    "Tabular data renderings (HTML tables) and KPI cards — not in L0173 v1",
     "Relational / network charts (graph, sankey, tree, treemap, sunburst)",
     "Scatter, radar, gauge, heatmap, boxplot, candlestick, funnel — out of scope for v1, slot in later",
-    "KPI sparklines (deferred to v2)",
     "Interactive table editing, formulas, or per-cell scoring (use L0166 for spreadsheets)",
     "External data fetching (HTTP / file / DB) — programs evaluate against a fixed input",
     "Cross-language composition via import"

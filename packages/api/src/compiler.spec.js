@@ -101,6 +101,55 @@ describe("L0173 / line", () => {
   });
 });
 
+describe("L0173 / per-slice color palette", () => {
+  it("pie with color array stamps itemStyle.color on each slice (hex-resolved)", async () => {
+    const { errors, data } = await compileSource(`
+      pie title "Customer Segments"
+        data [
+          { name: "Enterprise" value: 50 }
+          { name: "SMB" value: 35 }
+          { name: "Individual" value: 15 }
+        ]
+        color ["blue-600", "emerald-500", "amber-400"]
+        {}..
+    `);
+    expect(errors).toBeNull();
+    const slices = data.option.series[0].data;
+    expect(slices[0].itemStyle.color).toBe("#2563eb");
+    expect(slices[1].itemStyle.color).toBe("#10b981");
+    expect(slices[2].itemStyle.color).toBe("#fbbf24");
+    expect(data.option.series[0].itemStyle).toBeUndefined();
+  });
+
+  it("color array cycles when shorter than data", async () => {
+    const { errors, data } = await compileSource(`
+      pie data [
+        { name: "A" value: 1 }
+        { name: "B" value: 2 }
+        { name: "C" value: 3 }
+        { name: "D" value: 4 }
+      ] color ["red-500", "blue-500"] {}..
+    `);
+    expect(errors).toBeNull();
+    const slices = data.option.series[0].data;
+    expect(slices[0].itemStyle.color).toBe("#ef4444");
+    expect(slices[1].itemStyle.color).toBe("#3b82f6");
+    expect(slices[2].itemStyle.color).toBe("#ef4444");
+    expect(slices[3].itemStyle.color).toBe("#3b82f6");
+  });
+
+  it("bar with numeric data and color array wraps each datum into a record", async () => {
+    const { errors, data } = await compileSource(
+      `bar data [10, 20, 30] color ["red-500", "blue-500", "green-500"] {}..`
+    );
+    expect(errors).toBeNull();
+    const items = data.option.series[0].data;
+    expect(items[0]).toEqual({ value: 10, itemStyle: { color: "#ef4444" } });
+    expect(items[1]).toEqual({ value: 20, itemStyle: { color: "#3b82f6" } });
+    expect(items[2]).toEqual({ value: 30, itemStyle: { color: "#22c55e" } });
+  });
+});
+
 describe("L0173 / pie (and donut, rose variants)", () => {
   it("regular pie", async () => {
     const { errors, data } = await compileSource(

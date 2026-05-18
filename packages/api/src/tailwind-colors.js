@@ -128,8 +128,10 @@ const TAILWIND = {
 
 // Resolve a Tailwind token to a hex color. If the input is already a
 // hex (#abc / #aabbcc), a CSS function color (rgb(...), hsl(...)), or
-// otherwise unknown, return it untouched.
+// otherwise unknown, return it untouched. Arrays are mapped element-
+// wise — useful for pie palettes (`color ["blue-600", ...]`).
 export function resolveColor(token) {
+  if (Array.isArray(token)) return token.map(resolveColor);
   if (typeof token !== "string") return token;
   if (token in TAILWIND) return TAILWIND[token];
   return token;

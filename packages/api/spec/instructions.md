@@ -97,6 +97,7 @@ writing ECharts config will fail. Map them to L0173 keywords first.
 | `name: "..." value: 40` keys ad-hoc on a series | On a series, `name "..."` sets the legend name and `data [...]` is the values. `{ name, value }` records are only used as elements *inside* `pie`'s `data` list. |
 | `legend: { orient: "horizontal" position: "top" }` | `legend top` (bare tag). Allowed tags: `top`, `bottom`, `left`, `right`, `inside`. Or `legend true` for default. |
 | `itemStyle: { color: "blue" }` | `color "blue-500"` — Tailwind token preferred; hex also works. |
+| Per-slice colors on pie (`itemStyle.color` per data item) | `color ["blue-600", "emerald-500", "amber-400"]` on the series — list cycles per slice. Don't pass an array as a single ECharts `itemStyle.color` value. |
 | `valueAxis` / `categoryAxis` keywords | Use `type value` / `type category` *inside* `y-axis`/`x-axis`. |
 | `background-color "..."` (CSS reflex) | If intent is **dark mode**: `theme dark`. If intent is a specific container color: `background "..."` (no `-color` suffix). |
 | `title-color "..."` / `axis-color "..."` / `label-color "..."` (per-element text colors) | Not exposed in v1. Use `theme dark` (or `theme light`) for coherent text recoloring across title, axes, legend, and labels at once. |

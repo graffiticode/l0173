@@ -289,7 +289,23 @@ function renderSeries(s, dualY) {
     }
     out.label = label;
   }
-  if (s.color !== undefined) out.itemStyle = { ...(out.itemStyle || {}), color: s.color };
+  // Color — string sets itemStyle.color at the series level; an array
+  // is a per-data-item palette (useful for pie slices).
+  if (Array.isArray(s.color)) {
+    if (Array.isArray(out.data)) {
+      out.data = out.data.map((item, i) => {
+        const color = s.color[i % s.color.length];
+        if (item && typeof item === "object") {
+          return { ...item, itemStyle: { ...(item.itemStyle || {}), color } };
+        }
+        // Wrap a bare value (e.g. a bar's numeric data point) into a
+        // record so we can attach per-item color without losing it.
+        return { value: item, itemStyle: { color } };
+      });
+    }
+  } else if (s.color !== undefined) {
+    out.itemStyle = { ...(out.itemStyle || {}), color: s.color };
+  }
   if (s.startAngle !== undefined) out.startAngle = s.startAngle;
   if (s.roseType !== undefined) out.roseType = s.roseType;
 

@@ -54,7 +54,7 @@ These setters chain inside any series constructor.
 | :--- | :--- | :--- |
 | `name` | string | Series name (used in legend and tooltips). |
 | `data` | list | Series data. Shape depends on series type — see each type's reference. |
-| `color` | string | Tailwind token (`"blue-500"`) or hex. Resolves to `itemStyle.color`. |
+| `color` | string or list | Tailwind token (`"blue-500"`) or hex. A *list* of colors becomes a per-data-item palette — useful for pie slices (`color ["blue-600", "emerald-500", "amber-400"]`). |
 | `axis` | tag (`left` \| `right`) | Bind the series to the left or right y-axis (default `left`). |
 | `stack` | string | Stack group name; series with the same stack name stack on each other. |
 | `smooth` | boolean | (line / area) Smooth line interpolation. |

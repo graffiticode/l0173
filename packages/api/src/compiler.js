@@ -238,6 +238,12 @@ function renderAxis(record) {
   if (record.interval !== undefined) out.interval = record.interval;
   if (record.boundaryGap !== undefined) out.boundaryGap = record.boundaryGap;
   if (record.inverse !== undefined) out.inverse = record.inverse;
+  // Per-tick label settings live under `axisLabel` in ECharts. Surface
+  // them as flat setters on the axis chain (currently: rotate; extend
+  // here for label color / font size / interval as needed).
+  if (record.rotate !== undefined) {
+    out.axisLabel = { ...(out.axisLabel || {}), rotate: record.rotate };
+  }
   return out;
 }
 

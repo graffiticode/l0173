@@ -67,7 +67,7 @@ const OPT_SETTERS = {
   INTERVAL:        "interval",
   BOUNDARY_GAP:    "boundaryGap",
   INVERSE:         "inverse",
-
+  ROTATE:          "rotate",
 };
 
 // METHOD → surface keyword. Convert UPPER_SNAKE → kebab-case.

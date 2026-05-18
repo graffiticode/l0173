@@ -92,6 +92,7 @@ writing ECharts config will fail. Map them to L0173 keywords first.
 | `label { show: true position: "top" }` (record-literal options) | `label-show true` only. Per-point label position is not exposed in v1. |
 | `option { title: { text: "..." } ... }` (JSON-literal config) | Use the chainable setters: `title "..."`, `subtitle "..."`, etc. No `option` keyword. |
 | `xAxis { type: "category" data: [...] }` (JSON-literal axis) | `x-axis type category categories [...] {}` — the axis is its own chainable block. |
+| `axisLabel: { rotate: 45 }` (rotate long tick labels) | `rotate 45` *inside* the `x-axis` / `y-axis` chain — flat setter, value in degrees. |
 | `series: [{ type: "bar", data: [...] }]` (object-literal series) | Use constructors: `series [bar data [...] {}]`. |
 | `name: "..." value: 40` keys ad-hoc on a series | On a series, `name "..."` sets the legend name and `data [...]` is the values. `{ name, value }` records are only used as elements *inside* `pie`'s `data` list. |
 | `legend: { orient: "horizontal" position: "top" }` | `legend top` (bare tag). Allowed tags: `top`, `bottom`, `left`, `right`, `inside`. Or `legend true` for default. |

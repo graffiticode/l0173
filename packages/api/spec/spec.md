@@ -84,6 +84,7 @@ These setters chain inside an `x-axis`, `y-axis`, or `y-axis-right` block.
 | `interval` | number | Tick spacing. |
 | `boundary-gap` | boolean | Whether to add padding at axis ends. |
 | `inverse` | boolean | Reverse the axis. |
+| `rotate` | number (degrees) | Rotate each tick label by N degrees. Useful for fitting long category labels (`rotate 45`). |
 
 ## Function Reference
 

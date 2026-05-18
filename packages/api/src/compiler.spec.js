@@ -136,6 +136,16 @@ describe("L0173 / pie (and donut, rose variants)", () => {
   });
 });
 
+describe("L0173 / axis options", () => {
+  it("x-axis rotate emits axisLabel.rotate on the chart option", async () => {
+    const { errors, data } = await compileSource(
+      `bar x-axis type category categories ["very long one", "very long two"] rotate 45 {} data [10, 20] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.xAxis.axisLabel).toEqual({ rotate: 45 });
+  });
+});
+
 describe("L0173 / chart wrapper (multi-series)", () => {
   it("two series on shared axes", async () => {
     const { errors, data } = await compileSource(`

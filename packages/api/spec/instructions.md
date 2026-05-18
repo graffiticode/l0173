@@ -55,6 +55,29 @@ lime, green, emerald, teal, cyan, sky, blue, indigo, violet, purple,
 fuchsia, pink, rose) × 11 shades (50, 100, 200, 300, 400, 500, 600, 700,
 800, 900, 950). Plus `black`, `white`, `transparent`.
 
+## Dark mode is one keyword
+
+If the user asks for a dark chart, dark theme, dark mode, or anything
+similar, **use `theme dark`**. One keyword. It flips the surrounding
+card chrome and the ECharts dark theme together, which recolors the
+title text, axis labels, gridlines, legend, tooltip background, and
+data text coherently.
+
+```
+chart
+  theme dark
+  series [bar data [10, 20, 30] {}]
+  {}
+```
+
+Don't try to assemble dark mode piece-by-piece (`background "..."` +
+per-element text colors). There are no `title-color`, `axis-color`,
+`label-color`, etc. setters in v1, and `background` is *only* a
+container background — it doesn't recolor any text.
+
+For light mode, omit `theme` (default) or write `theme light` for
+explicitness.
+
 ## ECharts idioms that don't translate to L0173
 
 L0173 is **not** ECharts JSON. It's a prefix-applied DSL with chainable
@@ -74,6 +97,8 @@ writing ECharts config will fail. Map them to L0173 keywords first.
 | `legend: { orient: "horizontal" position: "top" }` | `legend top` (bare tag). Allowed tags: `top`, `bottom`, `left`, `right`, `inside`. Or `legend true` for default. |
 | `itemStyle: { color: "blue" }` | `color "blue-500"` — Tailwind token preferred; hex also works. |
 | `valueAxis` / `categoryAxis` keywords | Use `type value` / `type category` *inside* `y-axis`/`x-axis`. |
+| `background-color "..."` (CSS reflex) | If intent is **dark mode**: `theme dark`. If intent is a specific container color: `background "..."` (no `-color` suffix). |
+| `title-color "..."` / `axis-color "..."` / `label-color "..."` (per-element text colors) | Not exposed in v1. Use `theme dark` (or `theme light`) for coherent text recoloring across title, axes, legend, and labels at once. |
 
 ## Common pitfalls
 

@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 import "../../index.css";
-import { useState, useEffect } from "react";
 
-import { ThemeToggle } from "./ThemeToggle";
 import { EChart } from "./EChart";
 
 function classNames(...classes: (string | false | null | undefined)[]) {
@@ -59,18 +57,9 @@ function render({ state, theme }: { state: any; theme: string | undefined }) {
 }
 
 export const Form = ({ state }: { state: any }) => {
-  const initialTheme = state.data?.theme;
-  const [theme, setTheme] = useState<string | undefined>(initialTheme);
-
-  useEffect(() => {
-    if (state.data?.theme && state.data.theme !== theme) {
-      setTheme(state.data.theme);
-    }
-  }, [state.data?.theme]);
-
-  useEffect(() => {
-    state.apply({ type: "update", args: { theme } });
-  }, [theme]);
+  // Theme is set by the program (`theme dark` / `theme light`), not by
+  // an interactive toggle. The renderer just reads it.
+  const theme = state.data?.theme;
 
   return (
     <div
@@ -79,9 +68,6 @@ export const Form = ({ state }: { state: any }) => {
         "rounded-md flex flex-col gap-4 p-4"
       )}
     >
-      <div className="flex justify-end">
-        <ThemeToggle theme={theme ?? "light"} setTheme={setTheme} />
-      </div>
       {Array.isArray(state.data?.errors) && state.data.errors.length > 0
         ? renderErrors(state.data.errors, theme)
         : render({ state, theme })}

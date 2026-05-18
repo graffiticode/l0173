@@ -184,6 +184,7 @@ function assembleEnvelope(record, seriesType) {
     if (chartLevel.title !== undefined) option.title.text = chartLevel.title;
     if (chartLevel.subtitle !== undefined) option.title.subtext = chartLevel.subtitle;
   }
+  let legendPosition;
   if (chartLevel.legend !== undefined) {
     const legend = renderLegend(chartLevel.legend);
     // When the legend is at the top and there's a title, ECharts doesn't
@@ -192,6 +193,8 @@ function assembleEnvelope(record, seriesType) {
     if (legend && legend.top === 0 && option.title) {
       legend.top = chartLevel.subtitle !== undefined ? 50 : 30;
     }
+    if (legend?.top !== undefined) legendPosition = "top";
+    else if (legend?.bottom !== undefined) legendPosition = "bottom";
     option.legend = legend;
   }
   if (chartLevel.tooltip !== undefined) {
@@ -211,7 +214,7 @@ function assembleEnvelope(record, seriesType) {
   }
   if (yAxes.length > 0) option.yAxis = yAxes.length === 1 ? yAxes[0] : yAxes;
 
-  option.series = seriesList.map((s) => renderSeries(s, yAxes.length > 1));
+  option.series = seriesList.map((s) => renderSeries(s, { dualY: yAxes.length > 1, legendPosition }));
 
   const envelope = { type: "chart", option };
   if (chartLevel.theme !== undefined) envelope.theme = chartLevel.theme;
@@ -266,7 +269,9 @@ function mapLabelPosition(p) {
   return p;
 }
 
-function renderSeries(s, dualY) {
+function renderSeries(s, ctx = {}) {
+  const dualY = !!ctx.dualY;
+  const legendPosition = ctx.legendPosition;
   if (!s || typeof s !== "object") return s;
   const out = { type: s.type };
   if (s.name !== undefined) out.name = s.name;
@@ -316,6 +321,15 @@ function renderSeries(s, dualY) {
       out.radius = [s.innerRadius, outer];
     } else if (s.radius !== undefined) {
       out.radius = s.radius;
+    }
+    // Pie ignores `grid` entirely — its `center` is computed against the
+    // canvas, not the available chart area. So when a legend sits at the
+    // top (or bottom), the pie's slice-label callouts can poke into the
+    // legend strip. Shift the center axis along the legend's axis to
+    // leave room. User-supplied `center` always wins.
+    if (s.center === undefined) {
+      if (legendPosition === "top") out.center = ["50%", "60%"];
+      else if (legendPosition === "bottom") out.center = ["50%", "40%"];
     }
   }
 

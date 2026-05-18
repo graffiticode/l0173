@@ -221,6 +221,30 @@ describe("L0173 / axis options", () => {
     expect(errors).toBeNull();
     expect(data.option.legend.top).toBe(0);
   });
+
+  it("pie pushes its center down when legend is at top (room for slice callouts)", async () => {
+    const { errors, data } = await compileSource(
+      `pie title "Portfolio" legend top data [{name: "A" value: 1}, {name: "B" value: 2}] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.series[0].center).toEqual(["50%", "60%"]);
+  });
+
+  it("pie pushes center up when legend is at bottom", async () => {
+    const { errors, data } = await compileSource(
+      `pie legend bottom data [{name: "A" value: 1}] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.series[0].center).toEqual(["50%", "40%"]);
+  });
+
+  it("pie keeps default center when no top/bottom legend", async () => {
+    const { errors, data } = await compileSource(
+      `pie data [{name: "A" value: 1}, {name: "B" value: 2}] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.series[0].center).toBeUndefined();
+  });
 });
 
 describe("L0173 / chart wrapper (multi-series)", () => {

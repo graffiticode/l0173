@@ -64,7 +64,8 @@ These setters chain inside any series constructor.
 | `step` | tag (`start` \| `middle` \| `end`) | (line) Render as a step chart. |
 | `symbol` | tag | Series symbol: `circle`, `rect`, `triangle`, `diamond`, `pin`, `arrow`, `none`. |
 | `symbol-size` | number | Symbol size in pixels. |
-| `label-show` | boolean | Show data labels on each point. |
+| `label-show` | boolean | Show data labels on each point / bar / slice. |
+| `label-position` | tag (`top` \| `inside` \| `bottom` \| `inside-top` \| `inside-bottom`) | Where to render the data label. Implies `label-show true` unless `label-show false` is also set. |
 | `outer-radius` | string or number | (pie) Outer radius (default `"75%"`). |
 | `inner-radius` | string or number | (pie) Inner radius — non-zero values produce a donut chart. |
 | `rose-type` | tag (`radius` \| `area`) | (pie) Nightingale rose. |

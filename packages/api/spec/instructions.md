@@ -85,6 +85,7 @@ writing ECharts config will fail. Map them to L0173 keywords first.
 | What you might write (ECharts reflex) | What L0173 expects |
 | :--- | :--- |
 | `show true` | There is no `show` keyword. Use the *intent-specific* setter: `label-show true` for data labels on points; `legend true` to enable the legend; `tooltip true` to enable tooltips. |
+| `label { position: "top" }` | `label-position top` — a flat setter. Setting `label-position` implies `label-show true`. |
 | `label show true` (decomposing `label`) | `label-show true` — it's a single hyphenated keyword. |
 | `label { show: true position: "top" }` (record-literal options) | `label-show true` only. Per-point label position is not exposed in v1. |
 | `option { title: { text: "..." } ... }` (JSON-literal config) | Use the chainable setters: `title "..."`, `subtitle "..."`, etc. No `option` keyword. |

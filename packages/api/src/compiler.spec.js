@@ -45,6 +45,39 @@ describe("L0173 / bar", () => {
     expect(errors).toBeNull();
     expect(data.option.series[0].itemStyle.color).toBe("#abcdef");
   });
+
+  it("bar with label-show true renders default-position labels", async () => {
+    const { errors, data } = await compileSource(`bar label-show true data [10, 20] {}..`);
+    expect(errors).toBeNull();
+    expect(data.option.series[0].label).toEqual({ show: true });
+  });
+
+  it("bar with label-position top implies label-show true", async () => {
+    const { errors, data } = await compileSource(`bar label-position top data [10, 20] {}..`);
+    expect(errors).toBeNull();
+    expect(data.option.series[0].label).toEqual({ show: true, position: "top" });
+  });
+
+  it("label-position inside-top maps to camelCase insideTop", async () => {
+    const { errors, data } = await compileSource(`bar label-position inside-top data [10, 20] {}..`);
+    expect(errors).toBeNull();
+    expect(data.option.series[0].label.position).toBe("insideTop");
+  });
+
+  it("explicit label-show false suppresses labels even with label-position", async () => {
+    const { errors, data } = await compileSource(
+      `bar label-position top label-show false data [10, 20] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.series[0].label).toEqual({ show: false, position: "top" });
+  });
+
+  it("rejects out-of-set label-position tag", async () => {
+    // `circle` is a known tag (symbol) but not a valid label-position.
+    const { errors } = await compileSource(`bar label-position circle data [10, 20] {}..`);
+    expect(errors).not.toBeNull();
+    expect(errors[0].message).toMatch(/Invalid label-position/);
+  });
 });
 
 describe("L0173 / line", () => {

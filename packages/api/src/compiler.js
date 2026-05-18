@@ -241,6 +241,15 @@ function renderAxis(record) {
   return out;
 }
 
+// Surface label-position tags are kebab-case (`inside-top`, etc.) to
+// match the rest of the language; ECharts expects camelCase.
+function mapLabelPosition(p) {
+  if (typeof p !== "string") return p;
+  if (p === "inside-top") return "insideTop";
+  if (p === "inside-bottom") return "insideBottom";
+  return p;
+}
+
 function renderSeries(s, dualY) {
   if (!s || typeof s !== "object") return s;
   const out = { type: s.type };
@@ -253,7 +262,17 @@ function renderSeries(s, dualY) {
   if (s.symbol !== undefined) out.symbol = s.symbol;
   if (s.symbolSize !== undefined) out.symbolSize = s.symbolSize;
   if (s.areaStyle !== undefined) out.areaStyle = s.areaStyle === true ? {} : s.areaStyle;
-  if (s.labelShow !== undefined) out.label = { show: !!s.labelShow };
+  // Labels — `label-position <tag>` implies `label-show true` (a user
+  // who positions labels clearly wants them rendered); explicit
+  // `label-show false` still wins.
+  if (s.labelShow !== undefined || s.labelPosition !== undefined) {
+    const show = s.labelShow !== undefined ? !!s.labelShow : true;
+    const label = { show };
+    if (s.labelPosition !== undefined) {
+      label.position = mapLabelPosition(s.labelPosition);
+    }
+    out.label = label;
+  }
   if (s.color !== undefined) out.itemStyle = { ...(out.itemStyle || {}), color: s.color };
   if (s.startAngle !== undefined) out.startAngle = s.startAngle;
   if (s.roseType !== undefined) out.roseType = s.roseType;

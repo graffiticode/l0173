@@ -61,6 +61,7 @@ const OPT_SETTERS = {
   SYMBOL:          "symbol",
   SYMBOL_SIZE:     "symbolSize",
   LABEL_SHOW:      "labelShow",
+  LABEL_POSITION:  "labelPosition",
   AXIS:            "axis",
   OUTER_RADIUS:    "radius",
   INNER_RADIUS:    "innerRadius",
@@ -115,6 +116,7 @@ const ENUM_TAGS = {
   ROSE_TYPE:       ["radius", "area"],
   FORMAT:          ["currency", "percent", "number", "compact"],
   DELTA_DIRECTION: ["up", "down", "neutral"],
+  LABEL_POSITION:  ["top", "inside", "bottom", "inside-top", "inside-bottom"],
 };
 
 // Bare-tag enums that aren't strictly checked for any single setter

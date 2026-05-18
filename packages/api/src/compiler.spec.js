@@ -250,6 +250,24 @@ describe("L0173 / axis options", () => {
     expect(data.option.series[0].center).toEqual(["50%", "40%"]);
   });
 
+  it("pie shifts right when legend is on the left (and legend runs vertically)", async () => {
+    const { errors, data } = await compileSource(
+      `pie data [{name: "A" value: 1}, {name: "B" value: 2}] legend left {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.legend).toEqual({ left: 0, orient: "vertical" });
+    expect(data.option.series[0].center).toEqual(["60%", "50%"]);
+  });
+
+  it("pie shifts left when legend is on the right", async () => {
+    const { errors, data } = await compileSource(
+      `pie data [{name: "A" value: 1}] legend right {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.legend).toEqual({ right: 0, orient: "vertical" });
+    expect(data.option.series[0].center).toEqual(["40%", "50%"]);
+  });
+
   it("pie keeps default center when no top/bottom legend", async () => {
     const { errors, data } = await compileSource(
       `pie data [{name: "A" value: 1}, {name: "B" value: 2}] {}..`

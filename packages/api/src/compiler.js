@@ -195,6 +195,8 @@ function assembleEnvelope(record, seriesType) {
     }
     if (legend?.top !== undefined) legendPosition = "top";
     else if (legend?.bottom !== undefined) legendPosition = "bottom";
+    else if (legend?.left !== undefined) legendPosition = "left";
+    else if (legend?.right !== undefined) legendPosition = "right";
     option.legend = legend;
   }
   if (chartLevel.tooltip !== undefined) {
@@ -230,7 +232,13 @@ function renderLegend(v) {
   // position" — and ECharts' default is top-center. Make that explicit
   // as `{top: 0}` so the title/legend stacking logic catches it.
   if (v === true) return { top: 0 };
-  if (typeof v === "string") return { [v]: 0 };
+  if (typeof v === "string") {
+    // Side legends should run vertically (ECharts' default orient is
+    // horizontal regardless of position, which looks wrong for left/
+    // right placements).
+    if (v === "left" || v === "right") return { [v]: 0, orient: "vertical" };
+    return { [v]: 0 };
+  }
   if (v && typeof v === "object") return v;
   return undefined;
 }
@@ -333,6 +341,8 @@ function renderSeries(s, ctx = {}) {
     if (s.center === undefined) {
       if (legendPosition === "top") out.center = ["50%", "60%"];
       else if (legendPosition === "bottom") out.center = ["50%", "40%"];
+      else if (legendPosition === "left") out.center = ["60%", "50%"];
+      else if (legendPosition === "right") out.center = ["40%", "50%"];
     }
   }
 

@@ -190,7 +190,10 @@ function assembleEnvelope(record, seriesType) {
   if (chartLevel.tooltip !== undefined) {
     option.tooltip = renderTooltip(chartLevel.tooltip);
   }
-  if (chartLevel.grid !== undefined) option.grid = chartLevel.grid;
+  // Default to `containLabel: true` so rotated and long axis labels are
+  // included in the chart's bounding box and never get clipped. Any
+  // user-supplied `grid` record fields override the default.
+  option.grid = { containLabel: true, ...(chartLevel.grid && typeof chartLevel.grid === "object" ? chartLevel.grid : {}) };
   if (chartLevel.animation !== undefined) option.animation = chartLevel.animation;
 
   const yAxes = [];

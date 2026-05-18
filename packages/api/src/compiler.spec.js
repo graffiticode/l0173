@@ -144,6 +144,12 @@ describe("L0173 / axis options", () => {
     expect(errors).toBeNull();
     expect(data.option.xAxis.axisLabel).toEqual({ rotate: 45 });
   });
+
+  it("default grid.containLabel is true so rotated/long labels are not clipped", async () => {
+    const { errors, data } = await compileSource(`bar data [10, 20, 30] {}..`);
+    expect(errors).toBeNull();
+    expect(data.option.grid.containLabel).toBe(true);
+  });
 });
 
 describe("L0173 / chart wrapper (multi-series)", () => {

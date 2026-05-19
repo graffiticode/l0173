@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// L0173 — Apache ECharts dialect (v1: bar / line / pie / table / kpi).
+// L0173 — Apache ECharts dialect (v1: bar / line / pie).
 //
 // The lexicon declares keyword groups so compiler.js can install Checker
 // and Transformer prototype methods via meta-generation. Hand-written

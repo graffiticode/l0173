@@ -32,7 +32,7 @@ Note: No test runner is currently configured. Test files exist (*.spec.js) but n
 
 ## Architecture
 
-This is a Graffiticode language implementation (L0173) with a monorepo structure using npm workspaces.
+L0173 is a Graffiticode dialect for authoring Apache ECharts charts. It is a monorepo using npm workspaces.
 
 ### Structure
 - **packages/api/**: Express server providing compilation API and language runtime
@@ -41,7 +41,7 @@ This is a Graffiticode language implementation (L0173) with a monorepo structure
   - Compiler built on @graffiticode/basis framework
 
 - **packages/app/**: React component library for rendering compiled output
-  - Exports Form component and related UI
+  - Renders chart envelopes via Apache ECharts
   - Uses SWR for data fetching
   - Built with Vite, TypeScript, and Tailwind CSS
 
@@ -49,30 +49,29 @@ This is a Graffiticode language implementation (L0173) with a monorepo structure
 
 The compiler extends the @graffiticode/basis framework with L0173-specific logic:
 
-- `compiler.js`: Defines `Checker` and `Transformer` classes extending Basis
-  - Checker validates AST nodes (e.g., THEME tag must be "dark" or "light")
-  - Transformer converts AST to output data objects
-- `compile.js`: API endpoint handler for compilation requests
-- `lexicon.js`: Language vocabulary definitions
+- `lexicon.js`: Declares the keyword surface. `SERIES_TYPES = ["bar", "line", "pie"]`, `OPT_SETTERS` maps each `METHOD` keyword to its output field, `ENUM_TAGS` lists tag-valued setters and their allowed tags. `CHART_LEVEL_FIELDS` separates chart-level fields from series-level fields.
+- `compiler.js`: Defines `Checker` and `Transformer`. The vast majority of arity-2 setters are installed onto both prototypes via a meta-gen loop over `OPT_SETTER_FIELDS`. Series constructors (`BAR`/`LINE`/`PIE`) and the `CHART` wrapper are hand-written — they assemble the ECharts `option` object (title, axes, legend, tooltip, grid, series array). `PROG` auto-wraps a bare top-level series into a full chart envelope so the renderer always sees a consistent shape.
+- `compile.js`: API endpoint handler for compilation requests.
+- `tailwind-colors.js`: Resolves Tailwind color tokens (e.g., `blue-500`) to hex for the `color` setter.
 
-**Language Functions**:
-| Function | Signature | Description |
-|----------|-----------|-------------|
-| `hello` | `<string>` | Renders "hello, {string}!" message |
-| `theme` | `[dark\|light] <record>` | Sets UI theme with toggle button |
-| `image` | `<string>` | Renders image from URL |
+**Renderer envelope shapes** (output of the Transformer):
+- `{type: "chart", option, theme?, palette?, background?, width?, height?}` — a chart, where `option` is a full ECharts option object
+- `{print: <value>}` — a print fallback for non-chart values
+
+**Supported series types**: `bar`, `line`, `pie`.
 
 ### UI Components (packages/app/lib/)
 
 - `view.jsx`: Main view component managing state and compilation via SWR
-- `components/form/Form.tsx`: Form component with theme support and conditional rendering
+- `components/form/Form.tsx`: Reads `state.data.type`; renders `chart` via `EChart`, falls back to `print`/JSON.
+- `components/form/EChart.tsx`: Thin wrapper around `echarts.init` that mounts an ECharts instance with the compiled `option` and selected theme.
 - `lib/api.js`: API client for backend communication
 - `lib/state.js`: Simple reducer-based state management
 
 ### Data Flow
 
 ```
-User Input → State Update → POST /compile → Compiler → Output Data → Form Render → postMessage to parent
+User Input → State Update → POST /compile → Compiler → Chart Envelope → EChart Render → postMessage to parent
 ```
 
 The app supports iframe embedding and communicates with parent windows via postMessage.
@@ -85,4 +84,5 @@ The app supports iframe embedding and communicates with parent windows via postM
 
 ### Dependencies
 - Uses local @graffiticode/basis package (symlinked from ../../../basis)
+- Apache ECharts (`echarts`) for chart rendering
 - Firestore emulator for development

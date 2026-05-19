@@ -12,14 +12,13 @@
 //    Checker validates the tag is in the allowed set and the
 //    Transformer extracts the tag string.
 //
-// 3. Series constructors (BAR / LINE / PIE / TABLE / KPI) and the CHART
-//    wrapper are hand-written — they have non-trivial assembly logic.
+// 3. Series constructors (BAR / LINE / PIE) and the CHART wrapper are
+//    hand-written — they have non-trivial assembly logic.
 //
 // 4. PROG auto-wraps a bare series (a top-level bar/line/pie that
 //    didn't go through `chart`) into a full chart envelope, so the
-//    renderer always sees one of the same four envelope shapes:
-//    `{type: "chart", option, theme?, palette?, ...}`,
-//    `{type: "table", ...}`, `{type: "kpi", ...}`, or `{print: ...}`.
+//    renderer always sees one of two envelope shapes:
+//    `{type: "chart", option, theme?, palette?, ...}` or `{print: ...}`.
 
 import {
   Checker as BasisChecker,
@@ -96,7 +95,7 @@ export class Transformer extends BasisTransformer {}
 //   Transformer.METHOD : `{...v1, [field]: extractValue(v0)}`.
 //
 // Methods whose surface keyword is itself a constructor (CHART, BAR,
-// LINE, PIE, TABLE, KPI) are excluded — they're hand-written below.
+// LINE, PIE) are excluded — they're hand-written below.
 // X_AXIS / Y_AXIS / Y_AXIS_RIGHT use the generic Transformer (the field
 // they write is just their inner record). COLOR resolves Tailwind
 // tokens to hex.

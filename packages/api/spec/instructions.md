@@ -2,9 +2,9 @@
 # L0173 Authoring Instructions
 
 L0173 is the Graffiticode charting dialect. Programs compile to an
-Apache ECharts canvas — a bar, line, or pie chart (including donut /
-nightingale-rose variants), used standalone or composed into a
-multi-series / dual-axis layout via the `chart` wrapper.
+Apache ECharts canvas — a bar, line, pie, or scatter chart (including
+donut / nightingale-rose variants of pie), used standalone or composed
+into a multi-series / dual-axis layout via the `chart` wrapper.
 
 ## Pick the right constructor
 
@@ -17,16 +17,17 @@ multi-series / dual-axis layout via the `chart` wrapper.
 | Donut chart | `pie` with `inner-radius "60%"` (and optionally `outer-radius "80%"`) |
 | Nightingale / rose / polar area | `pie` with `rose-type radius` (or `area`) |
 | Step chart | `line` with `step start` / `middle` / `end` |
+| XY relationship, point cloud, two numeric variables, correlation, distribution | `scatter` |
 | Two series on shared axes (e.g., bars + line overlay) | `chart` wrapper with `series [bar..., line...]` |
 | Two series at different scales (revenue + percent) | `chart` with `y-axis` + `y-axis-right`; bind one series with `axis right` |
 
 ## Composition rules
 
-- A standalone `bar` / `line` / `pie` at the top level compiles to a
-  complete chart. The `chart` wrapper is only needed for multiple
-  series on the same canvas.
+- A standalone `bar` / `line` / `pie` / `scatter` at the top level
+  compiles to a complete chart. The `chart` wrapper is only needed
+  for multiple series on the same canvas.
 - Inside `series [...]`, only series-producing constructors are valid:
-  `bar`, `line`, `pie`.
+  `bar`, `line`, `pie`, `scatter`.
 - All chainable attributes end with `{}` (the empty record).
 - Use commas between list items in records; lists of constructors in
   `series [bar... {}, line... {}]` need commas between items.
@@ -37,11 +38,18 @@ multi-series / dual-axis layout via the `chart` wrapper.
 | :--- | :--- |
 | `bar`, `line` | List of numbers `[120, 200, 150]`, or `[{name, value}]` records. |
 | `pie` | List of `[{ name: "...", value: 40 }, ...]` records. |
+| `scatter` | List of `[x, y]` pairs `[[1, 2], [3, 4]]`, or `[{ x, y, name? }]` records. The record form is normalized to ECharts' `{ value: [x, y], name? }`; use it when each point needs a tooltip / legend label. |
 
 For `bar` / `line`, the x-axis is usually a category axis:
 ```
 x-axis type category categories ["Mon", "Tue", "Wed"] {}
 ```
+
+For `scatter`, both axes are usually numeric. A standalone scatter
+auto-defaults `x-axis` and `y-axis` to `type value` when you don't
+declare one, so the minimal scatter is just `scatter data [[1, 2]
+[3, 4]] {}..`. Inside a `chart` wrapper, declare the axes at the
+chart level like any other series.
 
 ## Colors
 
@@ -121,8 +129,7 @@ writing ECharts config will fail. Map them to L0173 keywords first.
 
 - Network charts (graph / sankey / tree / treemap / sunburst). Pick a
   different dialect.
-- Scatter, radar, gauge, heatmap, boxplot, candlestick, funnel — not
-  in v1.
+- Radar, gauge, heatmap, boxplot, candlestick, funnel — not in v1.
 - Interactive editing or formulas (use L0166 for spreadsheet-style
   interactive content).
 - External data fetching — L0173 evaluates a closed program.

@@ -89,3 +89,12 @@ produce a valid L0173 program.
 68. Multi-series chart with animation false (no entry animations).
 69. Donut chart in dark theme with inner-radius "60%" and a top legend.
 70. Smooth line chart with palette "vintage" and a subtle background slate-900.
+
+## Category 6: Scatter (71–76)
+
+71. Scatter plot of height versus weight for ten people. Use circles in blue-500, symbol-size 10.
+72. Scatter plot titled "Income vs Spend" with points [[40, 32], [55, 41], [62, 50], [70, 58], [80, 65]] and color emerald-500.
+73. Scatter chart in dark theme of measurement noise around y=0 across x from 0 to 100, with diamond symbols.
+74. Scatter plot with named points: A at (1, 2), B at (3, 4), C at (5, 6) — label each point and show the legend at the top.
+75. Two scatter series on shared numeric axes — 2024 cohort and 2025 cohort — in blue-500 and amber-500, with legend top.
+76. Scatter plot of test scores across study hours where each point gets a distinct color from the palette ["blue-500", "amber-500", "emerald-500", "rose-500", "violet-500"].

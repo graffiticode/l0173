@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// L0173 — Apache ECharts dialect (v1: bar / line / pie).
+// L0173 — Apache ECharts dialect (v1: bar / line / pie / scatter).
 //
 // The lexicon declares keyword groups so compiler.js can install Checker
 // and Transformer prototype methods via meta-generation. Hand-written
@@ -13,10 +13,10 @@ const tag = () => ({ tk: 22, name: "TAG", cls: "val", length: 0, arity: 0 });
 // Series constructors. Each is arity 1 — takes one record built up via
 // chained arity-2 attribute setters terminating in `{}`.
 //
-// `bar` / `line` / `pie` produce ECharts series records and are
-// assembled into a full chart by the `chart` wrapper or by PROG when
-// used standalone.
-const SERIES_TYPES = ["bar", "line", "pie"];
+// `bar` / `line` / `pie` / `scatter` produce ECharts series records
+// and are assembled into a full chart by the `chart` wrapper or by
+// PROG when used standalone.
+const SERIES_TYPES = ["bar", "line", "pie", "scatter"];
 
 // All chainable arity-2 setters in one map: METHOD → output field.
 // Surface keys are derived from METHOD via lowercase + underscore→dash

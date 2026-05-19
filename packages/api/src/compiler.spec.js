@@ -346,6 +346,75 @@ describe("L0173 / chart wrapper (multi-series)", () => {
   });
 });
 
+describe("L0173 / scatter", () => {
+  it("standalone scatter produces a chart envelope with a scatter series", async () => {
+    const { errors, data } = await compileSource(`scatter data [[1, 2] [3, 4]] {}..`);
+    expect(errors).toBeNull();
+    expect(data.type).toBe("chart");
+    expect(data.option.series).toEqual([{ type: "scatter", data: [[1, 2], [3, 4]] }]);
+  });
+
+  it("standalone scatter defaults both axes to type value", async () => {
+    const { errors, data } = await compileSource(`scatter data [[1, 2] [3, 4]] {}..`);
+    expect(errors).toBeNull();
+    expect(data.option.xAxis).toEqual({ type: "value" });
+    expect(data.option.yAxis).toEqual({ type: "value" });
+  });
+
+  it("explicit x-axis overrides the scatter default", async () => {
+    const { errors, data } = await compileSource(
+      `scatter x-axis type category categories ["A", "B"] {} data [[1, 2] [3, 4]] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.xAxis).toEqual({ type: "category", data: ["A", "B"] });
+    expect(data.option.yAxis).toEqual({ type: "value" });
+  });
+
+  it("scatter accepts {x, y, name} record data and normalizes to ECharts value/name", async () => {
+    const { errors, data } = await compileSource(
+      `scatter data [{ x: 1 y: 2 name: "A" } { x: 3 y: 4 name: "B" }] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.series[0].data).toEqual([
+      { value: [1, 2], name: "A" },
+      { value: [3, 4], name: "B" },
+    ]);
+  });
+
+  it("scatter propagates symbol and symbol-size onto the series", async () => {
+    const { errors, data } = await compileSource(
+      `scatter symbol triangle symbol-size 14 data [[1, 2]] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.series[0]).toMatchObject({ symbol: "triangle", symbolSize: 14 });
+  });
+
+  it("scatter color array applies per-point itemStyle cycling on pair data", async () => {
+    const { errors, data } = await compileSource(
+      `scatter color ["blue-500" "amber-500"] data [[1, 2] [3, 4] [5, 6]] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.series[0].data).toEqual([
+      { value: [1, 2], itemStyle: { color: "#3b82f6" } },
+      { value: [3, 4], itemStyle: { color: "#f59e0b" } },
+      { value: [5, 6], itemStyle: { color: "#3b82f6" } },
+    ]);
+  });
+
+  it("scatter inside chart respects chart-level axes and series list", async () => {
+    const { errors, data } = await compileSource(
+      `chart x-axis type value name "Income" {} y-axis type value name "Spend" {} series [scatter name "2024" data [[40, 32]] {}, scatter name "2025" data [[42, 35]] {}] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.xAxis).toEqual({ type: "value", name: "Income" });
+    expect(data.option.yAxis).toEqual({ type: "value", name: "Spend" });
+    expect(data.option.series).toEqual([
+      { type: "scatter", name: "2024", data: [[40, 32]] },
+      { type: "scatter", name: "2025", data: [[42, 35]] },
+    ]);
+  });
+});
+
 describe("L0173 / theme", () => {
   it("threads theme dark into the envelope", async () => {
     const { errors, data } = await compileSource(`chart theme dark series [bar data [1, 2] {}] {}..`);

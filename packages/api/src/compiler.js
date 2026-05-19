@@ -12,12 +12,15 @@
 //    Checker validates the tag is in the allowed set and the
 //    Transformer extracts the tag string.
 //
-// 3. Series constructors (BAR / LINE / PIE) and the CHART wrapper are
-//    hand-written — they have non-trivial assembly logic.
+// 3. Series constructors (BAR / LINE / PIE / SCATTER) and the CHART
+//    wrapper are hand-written — they have non-trivial assembly logic.
+//    The bar/line/pie/scatter constructors are installed via a loop
+//    over SERIES_TYPE_NAMES; SCATTER then overrides its Transformer
+//    to inject numeric-axis defaults for the standalone path.
 //
-// 4. PROG auto-wraps a bare series (a top-level bar/line/pie that
-//    didn't go through `chart`) into a full chart envelope, so the
-//    renderer always sees one of two envelope shapes:
+// 4. PROG auto-wraps a bare series (a top-level bar/line/pie/scatter
+//    that didn't go through `chart`) into a full chart envelope, so
+//    the renderer always sees one of two envelope shapes:
 //    `{type: "chart", option, theme?, palette?, ...}` or `{print: ...}`.
 
 import {
@@ -95,7 +98,7 @@ export class Transformer extends BasisTransformer {}
 //   Transformer.METHOD : `{...v1, [field]: extractValue(v0)}`.
 //
 // Methods whose surface keyword is itself a constructor (CHART, BAR,
-// LINE, PIE) are excluded — they're hand-written below.
+// LINE, PIE, SCATTER) are excluded — they're hand-written below.
 // X_AXIS / Y_AXIS / Y_AXIS_RIGHT use the generic Transformer (the field
 // they write is just their inner record). COLOR resolves Tailwind
 // tokens to hex.
@@ -294,6 +297,32 @@ function renderSeries(s, ctx = {}) {
   const out = { type: s.type };
   if (s.name !== undefined) out.name = s.name;
   if (s.data !== undefined) out.data = s.data;
+  // Scatter accepts `[[x, y], ...]` pairs (native ECharts) or
+  // `[{x: ..., y: ..., name?}, ...]` records. Normalize the record
+  // shape to ECharts' `{value: [x, y], name?}`. Record literals arrive
+  // as basis-wrapped `{_type: "record", _entries: Map}` here; only the
+  // basis renderer phase flattens them later, so we read from
+  // `_entries` directly and return a plain object that downstream
+  // rendering can treat uniformly.
+  if (s.type === "scatter" && Array.isArray(out.data)) {
+    out.data = out.data.map((item) => {
+      if (
+        item && typeof item === "object" &&
+        item._type === "record" && item._entries instanceof Map
+      ) {
+        const x = item._entries.get("tag:x");
+        const y = item._entries.get("tag:y");
+        if (x === undefined || y === undefined) return item;
+        const point = { value: [x, y] };
+        for (const [encodedKey, value] of item._entries) {
+          const baseKey = encodedKey.substring(encodedKey.indexOf(":") + 1);
+          if (baseKey !== "x" && baseKey !== "y") point[baseKey] = value;
+        }
+        return point;
+      }
+      return item;
+    });
+  }
   if (s.stack !== undefined) out.stack = s.stack;
   if (s.smooth !== undefined) out.smooth = s.smooth;
   if (s.step !== undefined) out.step = s.step;
@@ -313,16 +342,21 @@ function renderSeries(s, ctx = {}) {
     out.label = label;
   }
   // Color — string sets itemStyle.color at the series level; an array
-  // is a per-data-item palette (useful for pie slices).
+  // is a per-data-item palette (useful for pie slices and scatter
+  // points).
   if (Array.isArray(s.color)) {
     if (Array.isArray(out.data)) {
       out.data = out.data.map((item, i) => {
         const color = s.color[i % s.color.length];
+        // A scatter `[x, y]` pair is itself an array. Spreading it
+        // would scatter numeric keys onto the result; wrap it as a
+        // `{value: [x, y]}` record instead.
+        if (Array.isArray(item)) {
+          return { value: item, itemStyle: { color } };
+        }
         if (item && typeof item === "object") {
           return { ...item, itemStyle: { ...(item.itemStyle || {}), color } };
         }
-        // Wrap a bare value (e.g. a bar's numeric data point) into a
-        // record so we can attach per-item color without losing it.
         return { value: item, itemStyle: { color } };
       });
     }
@@ -379,11 +413,11 @@ Transformer.prototype.CHART = function (node, options, resume) {
   });
 };
 
-// `bar`, `line`, `pie` — series constructors (arity 1). Emit a bare
-// series record carrying both chart-level and series-level fields
-// mixed in; the splitting/assembly is deferred to PROG when used
-// standalone, or to `chart` when wrapped.
-for (const t of ["bar", "line", "pie"]) {
+// `bar`, `line`, `pie`, `scatter` — series constructors (arity 1).
+// Emit a bare series record carrying both chart-level and series-level
+// fields mixed in; the splitting/assembly is deferred to PROG when
+// used standalone, or to `chart` when wrapped.
+for (const t of SERIES_TYPE_NAMES) {
   const method = t.toUpperCase();
   Checker.prototype[method] = function (node, options, resume) {
     this.visit(node.elts[0], options, (e0) => {
@@ -396,6 +430,21 @@ for (const t of ["bar", "line", "pie"]) {
     });
   };
 }
+
+// `scatter` defaults both axes to numeric (`type: "value"`) when the
+// user hasn't declared one. Effective only on the standalone PROG path,
+// where the series record's top-level keys get hoisted by
+// `assembleEnvelope` — inside a `chart` wrapper these stay scoped to
+// the series element and are harmlessly ignored, so they never fight
+// chart-level axis declarations.
+Transformer.prototype.SCATTER = function (node, options, resume) {
+  this.visit(node.elts[0], options, (e0, v0) => {
+    const rec = { type: "scatter", ...(v0 || {}) };
+    if (rec.xAxis === undefined) rec.xAxis = { type: "value" };
+    if (rec.yAxis === undefined) rec.yAxis = { type: "value" };
+    resume([], rec);
+  });
+};
 
 // ---------------------------------------------------------------------------
 // PROG — top-level assembly

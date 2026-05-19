@@ -4,9 +4,9 @@
 This specification documents dialect-specific functions available in
 the **L0173** language of Graffiticode. L0173 is the *charting* dialect:
 it compiles programs into Apache ECharts visualizations — bar, line,
-and pie charts (with donut and nightingale-rose variants), used
-standalone or composed into multi-series and dual-axis layouts via
-the `chart` wrapper.
+pie, and scatter charts (with donut and nightingale-rose variants of
+pie), used standalone or composed into multi-series and dual-axis
+layouts via the `chart` wrapper.
 
 The core language specification, including syntax, semantics, and the
 base library, can be found here:
@@ -20,6 +20,7 @@ base library, can be found here:
 | `bar` | 1 | ECharts bar series | Vertical bar chart. Standalone usage produces a single-series chart. |
 | `line` | 1 | ECharts line series | Line chart; `smooth true` softens corners; `area-style true` fills under the curve. |
 | `pie` | 1 | ECharts pie series | Pie chart. `inner-radius "60%"` → donut. `rose-type radius` / `area` → nightingale rose. |
+| `scatter` | 1 | ECharts scatter series | XY point cloud. Standalone usage defaults both axes to `type value`. |
 
 ## Chart-level options
 
@@ -44,7 +45,7 @@ out of the series and applied at the chart level.
 | `width` | number or string | Width override (default: parent width). |
 | `height` | number or string | Height override (default: `h-96` from Tailwind). |
 | `animation` | boolean | Toggle ECharts animations. |
-| `series` | list of series | List of series constructors (`bar`, `line`, `pie`). |
+| `series` | list of series | List of series constructors (`bar`, `line`, `pie`, `scatter`). |
 
 ## Series-level options
 
@@ -172,6 +173,54 @@ pie
     { name: "Tue" value: 25 }
     { name: "Wed" value: 31 }
   ]
+  {}
+```
+
+### scatter
+
+XY scatter plot. `data` is either a list of `[x, y]` pairs or a list
+of `{ x, y, name? }` records (the record form is normalized to
+ECharts' `{ value: [x, y], name? }` shape and is useful when each
+point needs a tooltip / legend label).
+
+Standalone scatter defaults both axes to `type value` when the user
+hasn't declared one — without that injection the chart wouldn't
+render meaningfully. An explicit `x-axis` / `y-axis` always wins.
+Inside a `chart` wrapper, axes are declared at the chart level (like
+`bar` / `line`).
+
+Standalone scatter:
+```
+scatter
+  title "Height vs weight"
+  data [[170, 65] [175, 72] [168, 60] [182, 80]]
+  color "blue-500"
+  symbol circle
+  symbol-size 10
+  {}
+```
+
+Labeled points via the record shape:
+```
+scatter
+  data [
+    { x: 1 y: 2 name: "A" }
+    { x: 3 y: 4 name: "B" }
+  ]
+  symbol diamond
+  {}
+```
+
+Two scatter series sharing axes inside a `chart`:
+```
+chart
+  x-axis type value name "Income" {}
+  y-axis type value name "Spend"  {}
+  series [
+    scatter name "2024" data [[40, 32] [55, 41]] color "blue-500" {},
+    scatter name "2025" data [[42, 35] [60, 46]] color "amber-500" {}
+  ]
+  legend top
   {}
 ```
 

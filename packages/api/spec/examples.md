@@ -99,11 +99,11 @@ produce a valid L0173 program.
 75. Two scatter series on shared numeric axes — 2024 cohort and 2025 cohort — in blue-500 and amber-500, with legend top.
 76. Scatter plot of test scores across study hours where each point gets a distinct color from the palette ["blue-500", "amber-500", "emerald-500", "rose-500", "violet-500"].
 
-## Category 7: Scatter with mean line (77–82)
+## Category 7: Scatter with best-fit line (77–82)
 
-77. Scatter of (x, y) points [(1, 12), (2, 18), (3, 25), (4, 30), (5, 38), (6, 45), (7, 50), (8, 56), (9, 64), (10, 70)] overlaid with a horizontal line at the mean y-value (40.8). Use blue-500 for the points and amber-500 for the mean line, legend top.
-78. Combo chart: monthly customer counts as scatter [(1, 230), (2, 245), (3, 280), (4, 265), (5, 310), (6, 295)] plus a horizontal line across all six months at the mean (270.83). Title "Customer growth, H1".
-79. Scatter of weights (60–90 kg) across 15 trial numbers plus a horizontal line at the mean weight (75 kg). Both axes numeric, diamond symbols size 10.
-80. Scatter of test scores by study hours [(1, 55), (2, 60), (3, 65), (4, 72), (5, 78), (6, 82), (7, 85), (8, 90), (9, 93), (10, 96)] with a flat line at the mean score (77.6) named "average". Legend top, scatter in blue-500, line in rose-500.
-81. Scatter of cycle times in minutes for twelve tasks (values range 7–15) plus a mean line at 10.7 min. Diamond symbols size 12, dark theme.
-82. Temperature scatter [(1, 22), (2, 24), (3, 21), (4, 25), (5, 27), (6, 29), (7, 28)] with a horizontal mean line at 25.14, named "weekly mean". Dark theme, legend top, line in amber-500.
+77. Scatter of (x, y) points [(1, 12), (2, 18), (3, 25), (4, 30), (5, 38), (6, 45), (7, 50), (8, 56), (9, 64), (10, 70)] overlaid with a best-fit line (linear regression) through the points. Blue-500 for points, amber-500 for the line, legend top.
+78. Combo chart: monthly customer counts as scatter [(1, 230), (2, 245), (3, 280), (4, 265), (5, 310), (6, 295)] plus a best-fit trend line through the six months. Title "Customer growth, H1".
+79. Scatter of fifteen (trial, weight) measurements with weights ranging 60–90 kg, plus a linear regression line through the points. Numeric axes, diamond symbols size 10.
+80. Scatter of test scores by study hours [(1, 55), (2, 60), (3, 65), (4, 72), (5, 78), (6, 82), (7, 85), (8, 90), (9, 93), (10, 96)] with a best-fit line named "trend". Legend top, scatter in blue-500, line in rose-500.
+81. Scatter of cycle times in minutes for twelve tasks (values ranging 7–15) plus a least-squares best-fit line. Diamond symbols size 12, dark theme.
+82. Temperature scatter [(1, 22), (2, 24), (3, 21), (4, 25), (5, 27), (6, 29), (7, 28)] with a best-fit line named "trend" drawn across the same axes. Dark theme, legend top, line in amber-500.

@@ -226,7 +226,10 @@ function assembleEnvelope(record, seriesType) {
   }
   if (yAxes.length > 0) option.yAxis = yAxes.length === 1 ? yAxes[0] : yAxes;
 
-  option.series = seriesList.map((s) => renderSeries(s, { dualY: yAxes.length > 1, legendPosition }));
+  const hasLegend = chartLevel.legend !== undefined;
+  option.series = seriesList
+    .map((s) => renderSeries(s, { dualY: yAxes.length > 1, legendPosition }))
+    .flatMap((s) => splitNamedScatterForLegend(s, hasLegend));
 
   const envelope = { type: "chart", option };
   if (chartLevel.theme !== undefined) envelope.theme = chartLevel.theme;
@@ -339,6 +342,17 @@ function renderSeries(s, ctx = {}) {
     if (s.labelPosition !== undefined) {
       label.position = mapLabelPosition(s.labelPosition);
     }
+    // For scatter with named points, ECharts' default label formatter
+    // is the value `[x, y]` (rendered as "1,2"), which isn't useful.
+    // Show the point's `name` instead, and default the position to
+    // `top` so the label clears the symbol.
+    if (
+      show && s.type === "scatter" && Array.isArray(out.data) &&
+      out.data.some((d) => d && typeof d === "object" && d.name !== undefined)
+    ) {
+      label.formatter = "{b}";
+      if (label.position === undefined) label.position = "top";
+    }
     out.label = label;
   }
   // Color — string sets itemStyle.color at the series level; an array
@@ -393,6 +407,38 @@ function renderSeries(s, ctx = {}) {
   }
 
   return out;
+}
+
+// A single scatter series can't surface its data-point names in the
+// ECharts legend (legend items come from series names, not point
+// names). When the user enables a chart-level legend on a scatter
+// with named points and no explicit series name, split it into one
+// scatter series per point so each name gets a legend entry —
+// mirroring the way pie naturally maps its named data to legend
+// items. Per-point colors attached via `itemStyle.color` are hoisted
+// to the split series's itemStyle so legend swatches match.
+function splitNamedScatterForLegend(series, hasLegend) {
+  if (!hasLegend) return [series];
+  if (!series || series.type !== "scatter") return [series];
+  if (series.name !== undefined) return [series];
+  if (!Array.isArray(series.data) || series.data.length === 0) return [series];
+  const allNamed = series.data.every(
+    (d) => d && typeof d === "object" && !Array.isArray(d) && d.name !== undefined
+  );
+  if (!allNamed) return [series];
+  const { data, ...seriesRest } = series;
+  return data.map((point) => {
+    const { name, itemStyle, ...pointRest } = point;
+    const split = {
+      ...seriesRest,
+      name,
+      data: [itemStyle ? { ...pointRest, itemStyle } : pointRest],
+    };
+    if (itemStyle && itemStyle.color !== undefined) {
+      split.itemStyle = { ...(seriesRest.itemStyle || {}), color: itemStyle.color };
+    }
+    return split;
+  });
 }
 
 // ---------------------------------------------------------------------------

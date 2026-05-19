@@ -211,6 +211,18 @@ scatter
   {}
 ```
 
+When `label-show true` is set on a scatter with named points, the
+label content defaults to the point's `name` (positioned `top`,
+clear of the symbol) instead of ECharts' default `[x, y]` value.
+An explicit `label-position` still wins.
+
+When `legend top` (or any legend setter) is set on a scatter with
+named points and no series `name`, the series is automatically split
+into one scatter per point — each gets a legend entry under its
+point name, with palette colors cycling per entry. This mirrors how
+`pie` surfaces slice names in the legend. To opt out, give the
+series an explicit `name "..."`.
+
 Two scatter series sharing axes inside a `chart`:
 ```
 chart

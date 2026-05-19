@@ -51,6 +51,15 @@ declare one, so the minimal scatter is just `scatter data [[1, 2]
 [3, 4]] {}..`. Inside a `chart` wrapper, declare the axes at the
 chart level like any other series.
 
+For a scatter of *named categorical points* where each name should
+appear in the legend (the pie-style mapping), pass record-shape data
+with `name` and turn the legend on — `scatter legend top data [{ x:
+1 y: 2 name: "A" } ...] {}..`. The compiler splits the series into
+one entry per point so ECharts surfaces each name in the legend with
+its own palette color. To keep a single series instead, give it an
+explicit `name "..."`. `label-show true` on a named-point scatter
+labels each dot with its `name` (positioned `top`).
+
 ## Colors
 
 Prefer Tailwind tokens (`"blue-500"`, `"amber-400"`, `"emerald-600"`).

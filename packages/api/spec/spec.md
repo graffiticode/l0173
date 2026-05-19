@@ -216,12 +216,11 @@ When a scatter has named points, each point is labeled with its
 how `pie` always shows slice names alongside slices. To opt out, set
 `label-show false`. Explicit `label-position` always wins.
 
-When `legend top` (or any legend setter) is set on a scatter with
-named points and no series `name`, the series is automatically split
-into one scatter per point — each gets a legend entry under its
-point name, with palette colors cycling per entry. This mirrors how
-`pie` surfaces slice names in the legend. To opt out, give the
-series an explicit `name "..."`.
+The legend reflects *series* identity, not point identity — adding
+`legend top` to a single scatter without a series `name` won't
+produce meaningful entries. For per-name legend entries, write one
+scatter series per name inside a `chart` wrapper (see the
+multi-series example above), each with its own `name "..."`.
 
 Two scatter series sharing axes inside a `chart`:
 ```

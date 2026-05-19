@@ -226,10 +226,7 @@ function assembleEnvelope(record, seriesType) {
   }
   if (yAxes.length > 0) option.yAxis = yAxes.length === 1 ? yAxes[0] : yAxes;
 
-  const hasLegend = chartLevel.legend !== undefined;
-  option.series = seriesList
-    .map((s) => renderSeries(s, { dualY: yAxes.length > 1, legendPosition }))
-    .flatMap((s) => splitNamedScatterForLegend(s, hasLegend));
+  option.series = seriesList.map((s) => renderSeries(s, { dualY: yAxes.length > 1, legendPosition }));
 
   const envelope = { type: "chart", option };
   if (chartLevel.theme !== undefined) envelope.theme = chartLevel.theme;
@@ -410,42 +407,6 @@ function renderSeries(s, ctx = {}) {
   }
 
   return out;
-}
-
-// A single scatter series can't surface its data-point names in the
-// ECharts legend (legend items come from series names, not point
-// names). When the user enables a chart-level legend on a scatter
-// with named points and no explicit series name, split it into one
-// scatter series per point so each name gets a legend entry —
-// mirroring the way pie naturally maps its named data to legend
-// items. Per-point colors attached via `itemStyle.color` are hoisted
-// to the split series's itemStyle so legend swatches match.
-function splitNamedScatterForLegend(series, hasLegend) {
-  if (!hasLegend) return [series];
-  if (!series || series.type !== "scatter") return [series];
-  if (series.name !== undefined) return [series];
-  if (!Array.isArray(series.data) || series.data.length === 0) return [series];
-  const allNamed = series.data.every(
-    (d) => d && typeof d === "object" && !Array.isArray(d) && d.name !== undefined
-  );
-  if (!allNamed) return [series];
-  const { data, ...seriesRest } = series;
-  return data.map((point) => {
-    // Keep `name` on the data point too so a label `formatter "{b}"`
-    // still resolves (ECharts' `{b}` reads the data-point name, not
-    // the series name).
-    const { itemStyle, ...pointWithName } = point;
-    const dataPoint = itemStyle ? { ...pointWithName, itemStyle } : pointWithName;
-    const split = {
-      ...seriesRest,
-      name: point.name,
-      data: [dataPoint],
-    };
-    if (itemStyle && itemStyle.color !== undefined) {
-      split.itemStyle = { ...(seriesRest.itemStyle || {}), color: itemStyle.color };
-    }
-    return split;
-  });
 }
 
 // ---------------------------------------------------------------------------

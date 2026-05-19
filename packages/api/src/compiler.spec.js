@@ -454,54 +454,17 @@ describe("L0173 / scatter", () => {
     expect(data.option.series[0].label).toEqual({ show: true });
   });
 
-  it("named-point scatter with legend splits into one series per name", async () => {
+  it("named-point scatter stays as a single series regardless of legend setting", async () => {
     const { errors, data } = await compileSource(
       `scatter legend top data [{ x: 1 y: 2 name: "A" } { x: 3 y: 4 name: "B" } { x: 5 y: 6 name: "C" }] {}..`
-    );
-    expect(errors).toBeNull();
-    expect(data.option.series).toHaveLength(3);
-    expect(data.option.series[0]).toMatchObject({ type: "scatter", name: "A", data: [{ value: [1, 2], name: "A" }] });
-    expect(data.option.series[1]).toMatchObject({ type: "scatter", name: "B", data: [{ value: [3, 4], name: "B" }] });
-    expect(data.option.series[2]).toMatchObject({ type: "scatter", name: "C", data: [{ value: [5, 6], name: "C" }] });
-  });
-
-  it("split named scatter preserves the data-point name so a {b} label formatter still resolves", async () => {
-    const { errors, data } = await compileSource(
-      `scatter legend top data [{ x: 1 y: 2 name: "A" }] {}..`
-    );
-    expect(errors).toBeNull();
-    expect(data.option.series[0].data[0].name).toBe("A");
-    expect(data.option.series[0].label).toMatchObject({ show: true, formatter: "{b}" });
-  });
-
-  it("named-point scatter without legend stays as a single series", async () => {
-    const { errors, data } = await compileSource(
-      `scatter data [{ x: 1 y: 2 name: "A" } { x: 3 y: 4 name: "B" }] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series).toHaveLength(1);
     expect(data.option.series[0].data).toEqual([
       { value: [1, 2], name: "A" },
       { value: [3, 4], name: "B" },
+      { value: [5, 6], name: "C" },
     ]);
-  });
-
-  it("split named scatter hoists per-point color onto series itemStyle for matching legend swatches", async () => {
-    const { errors, data } = await compileSource(
-      `scatter legend top color ["blue-500" "amber-500"] data [{ x: 1 y: 2 name: "A" } { x: 3 y: 4 name: "B" }] {}..`
-    );
-    expect(errors).toBeNull();
-    expect(data.option.series).toHaveLength(2);
-    expect(data.option.series[0]).toMatchObject({
-      name: "A",
-      itemStyle: { color: "#3b82f6" },
-      data: [{ value: [1, 2], itemStyle: { color: "#3b82f6" } }],
-    });
-    expect(data.option.series[1]).toMatchObject({
-      name: "B",
-      itemStyle: { color: "#f59e0b" },
-      data: [{ value: [3, 4], itemStyle: { color: "#f59e0b" } }],
-    });
   });
 });
 

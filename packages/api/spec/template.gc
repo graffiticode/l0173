@@ -13,7 +13,7 @@ chart title "Weekly performance"
     name "USD (thousands)" {}
   series [
     bar name "Revenue"
-      data [
+      values [
         120
         200
         150

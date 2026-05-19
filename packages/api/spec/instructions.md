@@ -34,7 +34,7 @@ into a multi-series / dual-axis layout via the `chart` wrapper.
 
 ## Data shapes
 
-| Series | `data` shape |
+| Series | `values` shape |
 | :--- | :--- |
 | `bar`, `line` | List of numbers `[120, 200, 150]`, or `[{name, value}]` records. |
 | `pie` | List of `[{ name: "...", value: 40 }, ...]` records. |
@@ -47,7 +47,7 @@ x-axis type category categories ["Mon", "Tue", "Wed"] {}
 
 For `scatter`, both axes are usually numeric. A standalone scatter
 auto-defaults `x-axis` and `y-axis` to `type value` when you don't
-declare one, so the minimal scatter is just `scatter data [[1, 2]
+declare one, so the minimal scatter is just `scatter values [[1, 2]
 [3, 4]] {}..`. Inside a `chart` wrapper, declare the axes at the
 chart level like any other series.
 
@@ -85,7 +85,7 @@ data text coherently.
 ```
 chart
   theme dark
-  series [bar data [10, 20, 30] {}]
+  series [bar values [10, 20, 30] {}]
   {}
 ```
 
@@ -112,8 +112,8 @@ writing ECharts config will fail. Map them to L0173 keywords first.
 | `option { title: { text: "..." } ... }` (JSON-literal config) | Use the chainable setters: `title "..."`, `subtitle "..."`, etc. No `option` keyword. |
 | `xAxis { type: "category" data: [...] }` (JSON-literal axis) | `x-axis type category categories [...] {}` — the axis is its own chainable block. |
 | `axisLabel: { rotate: 45 }` (rotate long tick labels) | `rotate 45` *inside* the `x-axis` / `y-axis` chain — flat setter, value in degrees. |
-| `series: [{ type: "bar", data: [...] }]` (object-literal series) | Use constructors: `series [bar data [...] {}]`. |
-| `name: "..." value: 40` keys ad-hoc on a series | On a series, `name "..."` sets the legend name and `data [...]` is the values. `{ name, value }` records are only used as elements *inside* `pie`'s `data` list. |
+| `series: [{ type: "bar", data: [...] }]` (object-literal series) | Use constructors: `series [bar values [...] {}]`. |
+| `name: "..." value: 40` keys ad-hoc on a series | On a series, `name "..."` sets the legend name and `values [...]` is the data array. `{ name, value }` records are only used as elements *inside* `pie`'s `values` list. |
 | `legend: { orient: "horizontal" position: "top" }` | `legend top` (bare tag). Allowed tags: `top`, `bottom`, `left`, `right`, `inside`. Or `legend true` for default. |
 | `itemStyle: { color: "blue" }` | `color "blue-500"` — Tailwind token preferred; hex also works. |
 | Per-slice colors on pie (`itemStyle.color` per data item) | `color ["blue-600", "emerald-500", "amber-400"]` on the series — list cycles per slice. Don't pass an array as a single ECharts `itemStyle.color` value. |
@@ -135,6 +135,27 @@ writing ECharts config will fail. Map them to L0173 keywords first.
 - **Inventing keywords** — every chainable setter is documented in
   `spec.md`. If you can't find it there, it doesn't exist; pick the
   closest documented setter instead of guessing.
+
+## Piping data in
+
+L0173 inherits basis's arity-1 `data <defaults>` function. When the
+program runs downstream of another task, the upstream record overlays
+the defaults. To author a chart that has working example data *and*
+auto-picks-up live data when chained, pull the field via
+`get "<key>" (data {<key>: <defaults>})`:
+
+```
+bar
+  title "Quarterly revenue"
+  values get "values" data { values: [320, 450, 380, 510] }
+  color "blue-500"
+  {}..
+```
+
+The two surface keywords are deliberately separate: `values` is the
+chart's *inline literal* series data (Vega-Lite-style); `data` is the
+upstream-source function from basis. Don't confuse them — `values`
+takes a list, `data` takes a defaults record.
 
 ## Out of scope (do not attempt in L0173)
 

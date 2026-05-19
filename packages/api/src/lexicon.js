@@ -41,7 +41,7 @@ const OPT_SETTERS = {
 
   // Series-level options.
   NAME:            "name",
-  DATA:            "data",
+  VALUES:          "values",
   COLOR:           "color",
   SMOOTH:          "smooth",
   AREA_STYLE:      "areaStyle",

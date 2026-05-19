@@ -21,7 +21,7 @@ produce a valid L0173 program.
 12. Create a bar chart of expenses categorized as Rent 4500, Salaries 18000, Marketing 3200, Misc 800. Format the y-axis name as "USD".
 13. Compare two bar series side-by-side: Revenue [320, 450, 380, 510] and Costs [200, 280, 240, 320] over Q1–Q4. Use chart wrapper with series list.
 14. Bar chart with dark theme: weekday active users [1200, 1340, 1500, 1450, 1700].
-15. Bar chart with category labels rotated 45 degrees: categories ["very long label one", "very long label two"], data [100, 200]. Use `rotate 45` inside the x-axis chain.
+15. Bar chart with category labels rotated 45 degrees: categories ["very long label one", "very long label two"], values [100, 200]. Use `rotate 45` inside the x-axis chain.
 
 ## Category 2: Line charts (16–30)
 

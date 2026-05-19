@@ -296,7 +296,10 @@ function renderSeries(s, ctx = {}) {
   if (!s || typeof s !== "object") return s;
   const out = { type: s.type };
   if (s.name !== undefined) out.name = s.name;
-  if (s.data !== undefined) out.data = s.data;
+  // Surface keyword is `values` (basis's arity-1 `data` owns the `data`
+  // surface for upstream piping). The ECharts option field is still
+  // `data`, so the translation lives here.
+  if (s.values !== undefined) out.data = s.values;
   // Scatter accepts `[[x, y], ...]` pairs (native ECharts) or
   // `[{x: ..., y: ..., name?}, ...]` records. Normalize the record
   // shape to ECharts' `{value: [x, y], name?}`. Record literals arrive

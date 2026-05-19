@@ -54,7 +54,7 @@ These setters chain inside any series constructor.
 | Setter | Value | Effect |
 | :--- | :--- | :--- |
 | `name` | string | Series name (used in legend and tooltips). |
-| `data` | list | Series data. Shape depends on series type — see each type's reference. |
+| `values` | list | Series data. Shape depends on series type — see each type's reference. The surface keyword is `values` because basis's arity-1 `data` owns the `data` surface for upstream piping (see Piping below). |
 | `color` | string or list | Tailwind token (`"blue-500"`) or hex. A *list* of colors becomes a per-data-item palette — useful for pie slices (`color ["blue-600", "emerald-500", "amber-400"]`). |
 | `axis` | tag (`left` \| `right`) | Bind the series to the left or right y-axis (default `left`). |
 | `stack` | string | Stack group name; series with the same stack name stack on each other. |
@@ -99,8 +99,8 @@ chart
   title "Weekly performance"
   x-axis type category categories ["Mon", "Tue", "Wed", "Thu", "Fri"] {}
   series [
-    bar name "Revenue" data [120, 200, 150, 80, 70] {},
-    line name "Forecast" data [110, 180, 160, 90, 75] smooth true {}
+    bar name "Revenue" values [120, 200, 150, 80, 70] {},
+    line name "Forecast" values [110, 180, 160, 90, 75] smooth true {}
   ]
   legend top
   {}
@@ -111,27 +111,27 @@ series constructor compiles to a complete chart.
 
 ### bar
 
-Vertical bar chart. `data` is a list of numbers (one per category) or a
+Vertical bar chart. `values` is a list of numbers (one per category) or a
 list of `{ name, value }` records.
 
 ```
 bar
   title "Quarterly revenue"
   x-axis category ["Q1", "Q2", "Q3", "Q4"] {}
-  data [320, 450, 380, 510]
+  values [320, 450, 380, 510]
   color "blue-500"
   {}
 ```
 
 ### line
 
-Line chart. `data` is a list of numbers or `[x, y]` pairs.
+Line chart. `values` is a list of numbers or `[x, y]` pairs.
 
 ```
 line
   title "Daily users"
   x-axis category ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] {}
-  data [1200, 1340, 1500, 1450, 1700, 1850, 1900]
+  values [1200, 1340, 1500, 1450, 1700, 1850, 1900]
   smooth true
   symbol circle
   symbol-size 8
@@ -140,13 +140,13 @@ line
 
 ### pie / donut / rose
 
-Pie chart. `data` is a list of `{ name, value }` records.
+Pie chart. `values` is a list of `{ name, value }` records.
 
 Regular pie:
 ```
 pie
   title "Market share"
-  data [
+  values [
     { name: "A" value: 40 }
     { name: "B" value: 35 }
     { name: "C" value: 25 }
@@ -160,7 +160,7 @@ Donut — set `inner-radius` to a non-zero value (and optionally
 pie
   inner-radius "60%"
   outer-radius "80%"
-  data [{ name: "A" value: 40 }, { name: "B" value: 60 }]
+  values [{ name: "A" value: 40 }, { name: "B" value: 60 }]
   {}
 ```
 
@@ -168,7 +168,7 @@ Nightingale rose — set `rose-type`:
 ```
 pie
   rose-type radius
-  data [
+  values [
     { name: "Mon" value: 12 }
     { name: "Tue" value: 25 }
     { name: "Wed" value: 31 }
@@ -178,7 +178,7 @@ pie
 
 ### scatter
 
-XY scatter plot. `data` is either a list of `[x, y]` pairs or a list
+XY scatter plot. `values` is either a list of `[x, y]` pairs or a list
 of `{ x, y, name? }` records (the record form is normalized to
 ECharts' `{ value: [x, y], name? }` shape and is useful when each
 point needs a tooltip / legend label).
@@ -193,7 +193,7 @@ Standalone scatter:
 ```
 scatter
   title "Height vs weight"
-  data [[170, 65] [175, 72] [168, 60] [182, 80]]
+  values [[170, 65] [175, 72] [168, 60] [182, 80]]
   color "blue-500"
   symbol circle
   symbol-size 10
@@ -203,7 +203,7 @@ scatter
 Labeled points via the record shape:
 ```
 scatter
-  data [
+  values [
     { x: 1 y: 2 name: "A" }
     { x: 3 y: 4 name: "B" }
   ]
@@ -228,8 +228,8 @@ chart
   x-axis type value name "Income" {}
   y-axis type value name "Spend"  {}
   series [
-    scatter name "2024" data [[40, 32] [55, 41]] color "blue-500" {},
-    scatter name "2025" data [[42, 35] [60, 46]] color "amber-500" {}
+    scatter name "2024" values [[40, 32] [55, 41]] color "blue-500" {},
+    scatter name "2025" values [[42, 35] [60, 46]] color "amber-500" {}
   ]
   legend top
   {}
@@ -247,8 +247,8 @@ chart
   y-axis  type value name "USD (thousands)" {}
   y-axis-right type value name "% growth" min -10 max 20 {}
   series [
-    bar  name "Revenue"   data [320, 450, 380, 510]  color "blue-500"  {},
-    line name "Growth"    data [5, 12, -3, 8]        color "amber-500" axis right smooth true {}
+    bar  name "Revenue"   values [320, 450, 380, 510]  color "blue-500"  {},
+    line name "Growth"    values [5, 12, -3, 8]        color "amber-500" axis right smooth true {}
   ]
   legend top
   {}
@@ -269,7 +269,7 @@ Single-series bar with title:
 bar
   title "Sales"
   x-axis category ["Q1","Q2","Q3","Q4"] {}
-  data [320, 450, 380, 510]
+  values [320, 450, 380, 510]
   {}..
 ```
 
@@ -279,11 +279,37 @@ pie
   title "Allocation"
   theme dark
   inner-radius "60%"
-  data [
+  values [
     { name: "Stocks" value: 60 }
     { name: "Bonds" value: 30 }
     { name: "Cash" value: 10 }
   ]
   {}..
 ```
+
+## Piping
+
+L0173 inherits basis's arity-1 `data <defaults>` function. When a
+program runs downstream of another graffiticode task, the host
+delivers the upstream task's record as `options.data` at compile
+time; basis's `data` merges that upstream over the defaults and
+returns the merged record. Pull a specific field out for a `values`
+(or any other) setter with `get "<key>" (data {<key>: <default>})`.
+
+```
+bar
+  title "Quarterly revenue"
+  values get "values" data { values: [320, 450, 380, 510] }
+  color "blue-500"
+  {}..
+```
+
+- Standalone (no upstream bound) → uses the defaults `[320, 450, 380, 510]`.
+- Piped from an upstream `{values: [...]}` → uses the upstream values.
+- Piped from an upstream that doesn't carry a `values` key →
+  defaults preserved.
+
+The `values` keyword is the *literal-inline* series data; the
+unrelated `data` keyword is the *upstream-source* function. The
+naming follows Vega-Lite's split.
 

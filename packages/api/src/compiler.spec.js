@@ -15,9 +15,20 @@ async function compileSource(src) {
   });
 }
 
+async function compileSourceWithUpstream(src, upstream) {
+  const parsed = await parser.parse("0173", src, fullLexicon);
+  return new Promise((resolve) => {
+    // basis Compiler.compile signature is (code, data, config, cb) — `data`
+    // is wrapped as `options.data` internally.
+    compiler.compile(parsed, upstream, {}, (err, data) => {
+      resolve({ errors: err && err.length ? err : null, data });
+    });
+  });
+}
+
 describe("L0173 / bar", () => {
   it("standalone bar produces a chart envelope", async () => {
-    const { errors, data } = await compileSource(`bar data [120, 200, 150] {}..`);
+    const { errors, data } = await compileSource(`bar values [120, 200, 150] {}..`);
     expect(errors).toBeNull();
     expect(data.type).toBe("chart");
     expect(data.option.series).toEqual([{ type: "bar", data: [120, 200, 150] }]);
@@ -25,7 +36,7 @@ describe("L0173 / bar", () => {
 
   it("standalone bar with title and x-axis", async () => {
     const { errors, data } = await compileSource(
-      `bar title "Sales" x-axis type category categories ["Q1", "Q2"] {} data [320, 450] {}..`
+      `bar title "Sales" x-axis type category categories ["Q1", "Q2"] {} values [320, 450] {}..`
     );
     expect(errors).toBeNull();
     expect(data.type).toBe("chart");
@@ -35,38 +46,38 @@ describe("L0173 / bar", () => {
   });
 
   it("bar with Tailwind color resolves to hex", async () => {
-    const { errors, data } = await compileSource(`bar color "blue-500" data [1, 2, 3] {}..`);
+    const { errors, data } = await compileSource(`bar color "blue-500" values [1, 2, 3] {}..`);
     expect(errors).toBeNull();
     expect(data.option.series[0].itemStyle.color).toBe("#3b82f6");
   });
 
   it("bar with unknown color passes through", async () => {
-    const { errors, data } = await compileSource(`bar color "#abcdef" data [1, 2] {}..`);
+    const { errors, data } = await compileSource(`bar color "#abcdef" values [1, 2] {}..`);
     expect(errors).toBeNull();
     expect(data.option.series[0].itemStyle.color).toBe("#abcdef");
   });
 
   it("bar with label-show true renders default-position labels", async () => {
-    const { errors, data } = await compileSource(`bar label-show true data [10, 20] {}..`);
+    const { errors, data } = await compileSource(`bar label-show true values [10, 20] {}..`);
     expect(errors).toBeNull();
     expect(data.option.series[0].label).toEqual({ show: true });
   });
 
   it("bar with label-position top implies label-show true", async () => {
-    const { errors, data } = await compileSource(`bar label-position top data [10, 20] {}..`);
+    const { errors, data } = await compileSource(`bar label-position top values [10, 20] {}..`);
     expect(errors).toBeNull();
     expect(data.option.series[0].label).toEqual({ show: true, position: "top" });
   });
 
   it("label-position inside-top maps to camelCase insideTop", async () => {
-    const { errors, data } = await compileSource(`bar label-position inside-top data [10, 20] {}..`);
+    const { errors, data } = await compileSource(`bar label-position inside-top values [10, 20] {}..`);
     expect(errors).toBeNull();
     expect(data.option.series[0].label.position).toBe("insideTop");
   });
 
   it("explicit label-show false suppresses labels even with label-position", async () => {
     const { errors, data } = await compileSource(
-      `bar label-position top label-show false data [10, 20] {}..`
+      `bar label-position top label-show false values [10, 20] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series[0].label).toEqual({ show: false, position: "top" });
@@ -74,7 +85,7 @@ describe("L0173 / bar", () => {
 
   it("rejects out-of-set label-position tag", async () => {
     // `circle` is a known tag (symbol) but not a valid label-position.
-    const { errors } = await compileSource(`bar label-position circle data [10, 20] {}..`);
+    const { errors } = await compileSource(`bar label-position circle values [10, 20] {}..`);
     expect(errors).not.toBeNull();
     expect(errors[0].message).toMatch(/Invalid label-position/);
   });
@@ -82,20 +93,20 @@ describe("L0173 / bar", () => {
 
 describe("L0173 / line", () => {
   it("standalone line is smooth-aware", async () => {
-    const { errors, data } = await compileSource(`line smooth true data [10, 20, 30] {}..`);
+    const { errors, data } = await compileSource(`line smooth true values [10, 20, 30] {}..`);
     expect(errors).toBeNull();
     expect(data.option.series[0]).toMatchObject({ type: "line", smooth: true, data: [10, 20, 30] });
   });
 
   it("line accepts step tag", async () => {
-    const { errors, data } = await compileSource(`line step middle data [5, 10] {}..`);
+    const { errors, data } = await compileSource(`line step middle values [5, 10] {}..`);
     expect(errors).toBeNull();
     expect(data.option.series[0].step).toBe("middle");
   });
 
   it("rejects out-of-set step tag", async () => {
     // `top` is a known tag (legend position) but not a valid step.
-    const { errors } = await compileSource(`line step top data [1] {}..`);
+    const { errors } = await compileSource(`line step top values [1] {}..`);
     expect(errors).not.toBeNull();
     expect(errors[0].message).toMatch(/Invalid step/);
   });
@@ -105,7 +116,7 @@ describe("L0173 / per-slice color palette", () => {
   it("pie with color array stamps itemStyle.color on each slice (hex-resolved)", async () => {
     const { errors, data } = await compileSource(`
       pie title "Customer Segments"
-        data [
+        values [
           { name: "Enterprise" value: 50 }
           { name: "SMB" value: 35 }
           { name: "Individual" value: 15 }
@@ -123,7 +134,7 @@ describe("L0173 / per-slice color palette", () => {
 
   it("color array cycles when shorter than data", async () => {
     const { errors, data } = await compileSource(`
-      pie data [
+      pie values [
         { name: "A" value: 1 }
         { name: "B" value: 2 }
         { name: "C" value: 3 }
@@ -140,7 +151,7 @@ describe("L0173 / per-slice color palette", () => {
 
   it("bar with numeric data and color array wraps each datum into a record", async () => {
     const { errors, data } = await compileSource(
-      `bar data [10, 20, 30] color ["red-500", "blue-500", "green-500"] {}..`
+      `bar values [10, 20, 30] color ["red-500", "blue-500", "green-500"] {}..`
     );
     expect(errors).toBeNull();
     const items = data.option.series[0].data;
@@ -153,7 +164,7 @@ describe("L0173 / per-slice color palette", () => {
 describe("L0173 / pie (and donut, rose variants)", () => {
   it("regular pie", async () => {
     const { errors, data } = await compileSource(
-      `pie data [{ name: "A" value: 40 }, { name: "B" value: 60 }] {}..`
+      `pie values [{ name: "A" value: 40 }, { name: "B" value: 60 }] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series[0].type).toBe("pie");
@@ -161,7 +172,7 @@ describe("L0173 / pie (and donut, rose variants)", () => {
 
   it("donut via inner-radius", async () => {
     const { errors, data } = await compileSource(
-      `pie inner-radius "60%" outer-radius "80%" data [{name: "A" value: 1}] {}..`
+      `pie inner-radius "60%" outer-radius "80%" values [{name: "A" value: 1}] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series[0].radius).toEqual(["60%", "80%"]);
@@ -169,7 +180,7 @@ describe("L0173 / pie (and donut, rose variants)", () => {
 
   it("nightingale rose via rose-type tag", async () => {
     const { errors, data } = await compileSource(
-      `pie rose-type radius data [{name: "A" value: 1}] {}..`
+      `pie rose-type radius values [{name: "A" value: 1}] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series[0].roseType).toBe("radius");
@@ -178,7 +189,7 @@ describe("L0173 / pie (and donut, rose variants)", () => {
   it("rejects out-of-set rose-type", async () => {
     // `circle` is a known tag (symbol) but not a valid rose-type.
     const { errors } = await compileSource(
-      `pie rose-type circle data [{name: "A" value: 1}] {}..`
+      `pie rose-type circle values [{name: "A" value: 1}] {}..`
     );
     expect(errors).not.toBeNull();
     expect(errors[0].message).toMatch(/Invalid rose-type/);
@@ -188,21 +199,21 @@ describe("L0173 / pie (and donut, rose variants)", () => {
 describe("L0173 / axis options", () => {
   it("x-axis rotate emits axisLabel.rotate on the chart option", async () => {
     const { errors, data } = await compileSource(
-      `bar x-axis type category categories ["very long one", "very long two"] rotate 45 {} data [10, 20] {}..`
+      `bar x-axis type category categories ["very long one", "very long two"] rotate 45 {} values [10, 20] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.xAxis.axisLabel).toEqual({ rotate: 45 });
   });
 
   it("default grid.containLabel is true so rotated/long labels are not clipped", async () => {
-    const { errors, data } = await compileSource(`bar data [10, 20, 30] {}..`);
+    const { errors, data } = await compileSource(`bar values [10, 20, 30] {}..`);
     expect(errors).toBeNull();
     expect(data.option.grid.containLabel).toBe(true);
   });
 
   it("top legend with title stacks below the title (no overlap)", async () => {
     const { errors, data } = await compileSource(
-      `bar title "Revenue mix" legend top data [10, 20] {}..`
+      `bar title "Revenue mix" legend top values [10, 20] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.legend.top).toBe(30);
@@ -210,14 +221,14 @@ describe("L0173 / axis options", () => {
 
   it("top legend with title and subtitle leaves extra room", async () => {
     const { errors, data } = await compileSource(
-      `bar title "Revenue mix" subtitle "Q1 results" legend top data [10, 20] {}..`
+      `bar title "Revenue mix" subtitle "Q1 results" legend top values [10, 20] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.legend.top).toBe(50);
   });
 
   it("top legend without title stays flush to the top", async () => {
-    const { errors, data } = await compileSource(`bar legend top data [10, 20] {}..`);
+    const { errors, data } = await compileSource(`bar legend top values [10, 20] {}..`);
     expect(errors).toBeNull();
     expect(data.option.legend.top).toBe(0);
   });
@@ -226,7 +237,7 @@ describe("L0173 / axis options", () => {
     // `legend true` is shorthand for the default position (top), so the
     // stacking logic should treat it like `legend top`.
     const { errors, data } = await compileSource(
-      `pie title "Customer Segments" data [{name: "A" value: 1}, {name: "B" value: 2}] legend true {}..`
+      `pie title "Customer Segments" values [{name: "A" value: 1}, {name: "B" value: 2}] legend true {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.legend.top).toBe(30);
@@ -236,7 +247,7 @@ describe("L0173 / axis options", () => {
 
   it("pie pushes its center down when legend is at top (room for slice callouts)", async () => {
     const { errors, data } = await compileSource(
-      `pie title "Portfolio" legend top data [{name: "A" value: 1}, {name: "B" value: 2}] {}..`
+      `pie title "Portfolio" legend top values [{name: "A" value: 1}, {name: "B" value: 2}] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series[0].center).toEqual(["50%", "60%"]);
@@ -244,7 +255,7 @@ describe("L0173 / axis options", () => {
 
   it("pie pushes center up when legend is at bottom", async () => {
     const { errors, data } = await compileSource(
-      `pie legend bottom data [{name: "A" value: 1}] {}..`
+      `pie legend bottom values [{name: "A" value: 1}] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series[0].center).toEqual(["50%", "40%"]);
@@ -252,7 +263,7 @@ describe("L0173 / axis options", () => {
 
   it("pie shifts right when legend is on the left (and legend runs vertically)", async () => {
     const { errors, data } = await compileSource(
-      `pie data [{name: "A" value: 1}, {name: "B" value: 2}] legend left {}..`
+      `pie values [{name: "A" value: 1}, {name: "B" value: 2}] legend left {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.legend).toEqual({ left: 0, orient: "vertical" });
@@ -261,7 +272,7 @@ describe("L0173 / axis options", () => {
 
   it("left legend with title stacks below the title (keeps left position)", async () => {
     const { errors, data } = await compileSource(
-      `pie title "Customer Segments" data [{name: "A" value: 1}] legend left {}..`
+      `pie title "Customer Segments" values [{name: "A" value: 1}] legend left {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.legend).toEqual({ left: 0, orient: "vertical", top: 30 });
@@ -270,7 +281,7 @@ describe("L0173 / axis options", () => {
 
   it("right legend with title stacks below the title (keeps right position)", async () => {
     const { errors, data } = await compileSource(
-      `pie title "Customer Segments" data [{name: "A" value: 1}] legend right {}..`
+      `pie title "Customer Segments" values [{name: "A" value: 1}] legend right {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.legend).toEqual({ right: 0, orient: "vertical", top: 30 });
@@ -279,7 +290,7 @@ describe("L0173 / axis options", () => {
 
   it("bottom legend with title does NOT get bumped (already clear of title)", async () => {
     const { errors, data } = await compileSource(
-      `pie title "Customer Segments" data [{name: "A" value: 1}] legend bottom {}..`
+      `pie title "Customer Segments" values [{name: "A" value: 1}] legend bottom {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.legend.top).toBeUndefined();
@@ -288,7 +299,7 @@ describe("L0173 / axis options", () => {
 
   it("pie shifts left when legend is on the right", async () => {
     const { errors, data } = await compileSource(
-      `pie data [{name: "A" value: 1}] legend right {}..`
+      `pie values [{name: "A" value: 1}] legend right {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.legend).toEqual({ right: 0, orient: "vertical" });
@@ -297,7 +308,7 @@ describe("L0173 / axis options", () => {
 
   it("pie keeps default center when no top/bottom legend", async () => {
     const { errors, data } = await compileSource(
-      `pie data [{name: "A" value: 1}, {name: "B" value: 2}] {}..`
+      `pie values [{name: "A" value: 1}, {name: "B" value: 2}] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series[0].center).toBeUndefined();
@@ -312,8 +323,8 @@ describe("L0173 / chart wrapper (multi-series)", () => {
         x-axis type category categories ["Mon", "Tue", "Wed"] {}
         y-axis type value {}
         series [
-          bar name "Revenue" data [120, 200, 150] {},
-          line name "Forecast" data [110, 180, 160] smooth true {}
+          bar name "Revenue" values [120, 200, 150] {},
+          line name "Forecast" values [110, 180, 160] smooth true {}
         ]
         {}..
     `);
@@ -332,8 +343,8 @@ describe("L0173 / chart wrapper (multi-series)", () => {
         y-axis type value name "USD" {}
         y-axis-right type value name "%" {}
         series [
-          bar data [100, 200] {},
-          line data [5, -3] axis right {}
+          bar values [100, 200] {},
+          line values [5, -3] axis right {}
         ]
         {}..
     `);
@@ -348,14 +359,14 @@ describe("L0173 / chart wrapper (multi-series)", () => {
 
 describe("L0173 / scatter", () => {
   it("standalone scatter produces a chart envelope with a scatter series", async () => {
-    const { errors, data } = await compileSource(`scatter data [[1, 2] [3, 4]] {}..`);
+    const { errors, data } = await compileSource(`scatter values [[1, 2] [3, 4]] {}..`);
     expect(errors).toBeNull();
     expect(data.type).toBe("chart");
     expect(data.option.series).toEqual([{ type: "scatter", data: [[1, 2], [3, 4]] }]);
   });
 
   it("standalone scatter defaults both axes to type value", async () => {
-    const { errors, data } = await compileSource(`scatter data [[1, 2] [3, 4]] {}..`);
+    const { errors, data } = await compileSource(`scatter values [[1, 2] [3, 4]] {}..`);
     expect(errors).toBeNull();
     expect(data.option.xAxis).toEqual({ type: "value" });
     expect(data.option.yAxis).toEqual({ type: "value" });
@@ -363,7 +374,7 @@ describe("L0173 / scatter", () => {
 
   it("explicit x-axis overrides the scatter default", async () => {
     const { errors, data } = await compileSource(
-      `scatter x-axis type category categories ["A", "B"] {} data [[1, 2] [3, 4]] {}..`
+      `scatter x-axis type category categories ["A", "B"] {} values [[1, 2] [3, 4]] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.xAxis).toEqual({ type: "category", data: ["A", "B"] });
@@ -372,7 +383,7 @@ describe("L0173 / scatter", () => {
 
   it("scatter accepts {x, y, name} record data and normalizes to ECharts value/name", async () => {
     const { errors, data } = await compileSource(
-      `scatter data [{ x: 1 y: 2 name: "A" } { x: 3 y: 4 name: "B" }] {}..`
+      `scatter values [{ x: 1 y: 2 name: "A" } { x: 3 y: 4 name: "B" }] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series[0].data).toEqual([
@@ -383,7 +394,7 @@ describe("L0173 / scatter", () => {
 
   it("scatter propagates symbol and symbol-size onto the series", async () => {
     const { errors, data } = await compileSource(
-      `scatter symbol triangle symbol-size 14 data [[1, 2]] {}..`
+      `scatter symbol triangle symbol-size 14 values [[1, 2]] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series[0]).toMatchObject({ symbol: "triangle", symbolSize: 14 });
@@ -391,7 +402,7 @@ describe("L0173 / scatter", () => {
 
   it("scatter color array applies per-point itemStyle cycling on pair data", async () => {
     const { errors, data } = await compileSource(
-      `scatter color ["blue-500" "amber-500"] data [[1, 2] [3, 4] [5, 6]] {}..`
+      `scatter color ["blue-500" "amber-500"] values [[1, 2] [3, 4] [5, 6]] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series[0].data).toEqual([
@@ -403,7 +414,7 @@ describe("L0173 / scatter", () => {
 
   it("scatter inside chart respects chart-level axes and series list", async () => {
     const { errors, data } = await compileSource(
-      `chart x-axis type value name "Income" {} y-axis type value name "Spend" {} series [scatter name "2024" data [[40, 32]] {}, scatter name "2025" data [[42, 35]] {}] {}..`
+      `chart x-axis type value name "Income" {} y-axis type value name "Spend" {} series [scatter name "2024" values [[40, 32]] {}, scatter name "2025" values [[42, 35]] {}] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.xAxis).toEqual({ type: "value", name: "Income" });
@@ -416,7 +427,7 @@ describe("L0173 / scatter", () => {
 
   it("scatter with named points labels each point with its name by default", async () => {
     const { errors, data } = await compileSource(
-      `scatter data [{ x: 1 y: 2 name: "A" } { x: 3 y: 4 name: "B" }] {}..`
+      `scatter values [{ x: 1 y: 2 name: "A" } { x: 3 y: 4 name: "B" }] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series[0].label).toEqual({
@@ -428,7 +439,7 @@ describe("L0173 / scatter", () => {
 
   it("scatter with named points respects explicit label-show false", async () => {
     const { errors, data } = await compileSource(
-      `scatter label-show false data [{ x: 1 y: 2 name: "A" }] {}..`
+      `scatter label-show false values [{ x: 1 y: 2 name: "A" }] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series[0].label).toEqual({ show: false });
@@ -436,7 +447,7 @@ describe("L0173 / scatter", () => {
 
   it("explicit label-position overrides the scatter default", async () => {
     const { errors, data } = await compileSource(
-      `scatter label-show true label-position bottom data [{ x: 1 y: 2 name: "A" }] {}..`
+      `scatter label-show true label-position bottom values [{ x: 1 y: 2 name: "A" }] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series[0].label).toEqual({
@@ -448,7 +459,7 @@ describe("L0173 / scatter", () => {
 
   it("scatter without named points keeps default label config (no name formatter)", async () => {
     const { errors, data } = await compileSource(
-      `scatter label-show true data [[1, 2] [3, 4]] {}..`
+      `scatter label-show true values [[1, 2] [3, 4]] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series[0].label).toEqual({ show: true });
@@ -456,7 +467,7 @@ describe("L0173 / scatter", () => {
 
   it("named-point scatter stays as a single series regardless of legend setting", async () => {
     const { errors, data } = await compileSource(
-      `scatter legend top data [{ x: 1 y: 2 name: "A" } { x: 3 y: 4 name: "B" } { x: 5 y: 6 name: "C" }] {}..`
+      `scatter legend top values [{ x: 1 y: 2 name: "A" } { x: 3 y: 4 name: "B" } { x: 5 y: 6 name: "C" }] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series).toHaveLength(1);
@@ -468,16 +479,44 @@ describe("L0173 / scatter", () => {
   });
 });
 
+describe("L0173 / piping (basis data)", () => {
+  const piped = `bar values get "values" data {values: [1, 2, 3]} {}..`;
+
+  it("with no upstream, basis data falls back to the literal defaults", async () => {
+    const { errors, data } = await compileSource(piped);
+    expect(errors).toBeNull();
+    expect(data.option.series[0].data).toEqual([1, 2, 3]);
+  });
+
+  it("upstream record overlays the defaults (upstream wins)", async () => {
+    const { errors, data } = await compileSourceWithUpstream(piped, { values: [10, 20, 30] });
+    expect(errors).toBeNull();
+    expect(data.option.series[0].data).toEqual([10, 20, 30]);
+  });
+
+  it("upstream record without the matching key preserves the literal defaults", async () => {
+    const { errors, data } = await compileSourceWithUpstream(piped, { unrelated: 42 });
+    expect(errors).toBeNull();
+    expect(data.option.series[0].data).toEqual([1, 2, 3]);
+  });
+
+  it("standalone `values` literal still works without basis data", async () => {
+    const { errors, data } = await compileSource(`bar values [1, 2, 3] {}..`);
+    expect(errors).toBeNull();
+    expect(data.option.series[0].data).toEqual([1, 2, 3]);
+  });
+});
+
 describe("L0173 / theme", () => {
   it("threads theme dark into the envelope", async () => {
-    const { errors, data } = await compileSource(`chart theme dark series [bar data [1, 2] {}] {}..`);
+    const { errors, data } = await compileSource(`chart theme dark series [bar values [1, 2] {}] {}..`);
     expect(errors).toBeNull();
     expect(data.theme).toBe("dark");
   });
 
   it("rejects out-of-set theme tag", async () => {
     // `top` is a known tag (legend position) but not a valid theme mode.
-    const { errors } = await compileSource(`chart theme top series [bar data [1] {}] {}..`);
+    const { errors } = await compileSource(`chart theme top series [bar values [1] {}] {}..`);
     expect(errors).not.toBeNull();
     expect(errors[0].message).toMatch(/Invalid theme/);
   });

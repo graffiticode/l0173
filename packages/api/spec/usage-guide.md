@@ -62,7 +62,7 @@ A bar chart:
 bar
   title "Sales"
   x-axis category ["Q1","Q2","Q3","Q4"] {}
-  data [320, 450, 380, 510]
+  values [320, 450, 380, 510]
   color "blue-500"
   {}..
 ```
@@ -75,8 +75,8 @@ chart
   y-axis name "USD (thousands)" {}
   y-axis-right name "% growth" min -10 max 20 {}
   series [
-    bar  name "Revenue" data [320, 450, 380, 510] color "blue-500"  {},
-    line name "Growth"  data [5, 12, -3, 8]       color "amber-500" axis right smooth true {}
+    bar  name "Revenue" values [320, 450, 380, 510] color "blue-500"  {},
+    line name "Growth"  values [5, 12, -3, 8]       color "amber-500" axis right smooth true {}
   ]
   legend top
   {}..
@@ -87,7 +87,7 @@ A donut (pie with `inner-radius` non-zero):
 pie
   inner-radius "60%"
   outer-radius "80%"
-  data [
+  values [
     { name: "Stocks" value: 60 }
     { name: "Bonds" value: 30 }
     { name: "Cash" value: 10 }
@@ -103,7 +103,7 @@ surrounding card chrome and (for charts) ECharts' built-in dark theme:
 ```
 chart
   theme dark
-  series [bar data [10, 20, 30] {}]
+  series [bar values [10, 20, 30] {}]
   {}..
 ```
 

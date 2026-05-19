@@ -138,11 +138,12 @@ writing ECharts config will fail. Map them to L0173 keywords first.
 
 ## Piping data in
 
-L0173 inherits basis's arity-1 `data <defaults>` function. When the
-program runs downstream of another task, the upstream record overlays
-the defaults. To author a chart that has working example data *and*
-auto-picks-up live data when chained, pull the field via
-`get "<key>" (data {<key>: <defaults>})`:
+`values` takes the chart's series data inline. `data` is an arity-1
+function that returns a record: with no upstream bound, it returns
+the defaults you pass; when the program runs downstream of another
+task, the upstream record overlays the defaults. Combine them with
+`get` to author a chart with working example data that auto-picks-up
+live data when chained:
 
 ```
 bar
@@ -152,10 +153,8 @@ bar
   {}..
 ```
 
-The two surface keywords are deliberately separate: `values` is the
-chart's *inline literal* series data (Vega-Lite-style); `data` is the
-upstream-source function from basis. Don't confuse them — `values`
-takes a list, `data` takes a defaults record.
+`values` takes a list. `data` takes a defaults record. Don't confuse
+them.
 
 ## Out of scope (do not attempt in L0173)
 

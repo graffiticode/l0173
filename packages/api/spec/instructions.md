@@ -57,8 +57,12 @@ with `name` and turn the legend on — `scatter legend top data [{ x:
 1 y: 2 name: "A" } ...] {}..`. The compiler splits the series into
 one entry per point so ECharts surfaces each name in the legend with
 its own palette color. To keep a single series instead, give it an
-explicit `name "..."`. `label-show true` on a named-point scatter
-labels each dot with its `name` (positioned `top`).
+explicit `name "..."`.
+
+A scatter with named points also labels each dot with its `name`
+automatically (positioned `top`) — same way `pie` always renders
+slice names. Disable with `label-show false` when the labels would
+be noisy.
 
 ## Colors
 

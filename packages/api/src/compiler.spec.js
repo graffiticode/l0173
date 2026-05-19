@@ -414,9 +414,9 @@ describe("L0173 / scatter", () => {
     ]);
   });
 
-  it("scatter with named points and label-show true labels each point with its name", async () => {
+  it("scatter with named points labels each point with its name by default", async () => {
     const { errors, data } = await compileSource(
-      `scatter label-show true data [{ x: 1 y: 2 name: "A" } { x: 3 y: 4 name: "B" }] {}..`
+      `scatter data [{ x: 1 y: 2 name: "A" } { x: 3 y: 4 name: "B" }] {}..`
     );
     expect(errors).toBeNull();
     expect(data.option.series[0].label).toEqual({
@@ -424,6 +424,14 @@ describe("L0173 / scatter", () => {
       position: "top",
       formatter: "{b}",
     });
+  });
+
+  it("scatter with named points respects explicit label-show false", async () => {
+    const { errors, data } = await compileSource(
+      `scatter label-show false data [{ x: 1 y: 2 name: "A" }] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.series[0].label).toEqual({ show: false });
   });
 
   it("explicit label-position overrides the scatter default", async () => {
@@ -452,9 +460,18 @@ describe("L0173 / scatter", () => {
     );
     expect(errors).toBeNull();
     expect(data.option.series).toHaveLength(3);
-    expect(data.option.series[0]).toMatchObject({ type: "scatter", name: "A", data: [{ value: [1, 2] }] });
-    expect(data.option.series[1]).toMatchObject({ type: "scatter", name: "B", data: [{ value: [3, 4] }] });
-    expect(data.option.series[2]).toMatchObject({ type: "scatter", name: "C", data: [{ value: [5, 6] }] });
+    expect(data.option.series[0]).toMatchObject({ type: "scatter", name: "A", data: [{ value: [1, 2], name: "A" }] });
+    expect(data.option.series[1]).toMatchObject({ type: "scatter", name: "B", data: [{ value: [3, 4], name: "B" }] });
+    expect(data.option.series[2]).toMatchObject({ type: "scatter", name: "C", data: [{ value: [5, 6], name: "C" }] });
+  });
+
+  it("split named scatter preserves the data-point name so a {b} label formatter still resolves", async () => {
+    const { errors, data } = await compileSource(
+      `scatter legend top data [{ x: 1 y: 2 name: "A" }] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.series[0].data[0].name).toBe("A");
+    expect(data.option.series[0].label).toMatchObject({ show: true, formatter: "{b}" });
   });
 
   it("named-point scatter without legend stays as a single series", async () => {

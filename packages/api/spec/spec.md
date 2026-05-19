@@ -211,10 +211,10 @@ scatter
   {}
 ```
 
-When `label-show true` is set on a scatter with named points, the
-label content defaults to the point's `name` (positioned `top`,
-clear of the symbol) instead of ECharts' default `[x, y]` value.
-An explicit `label-position` still wins.
+When a scatter has named points, each point is labeled with its
+`name` by default (positioned `top`, clear of the symbol) — mirroring
+how `pie` always shows slice names alongside slices. To opt out, set
+`label-show false`. Explicit `label-position` always wins.
 
 When `legend top` (or any legend setter) is set on a scatter with
 named points and no series `name`, the series is automatically split

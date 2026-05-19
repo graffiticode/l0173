@@ -336,20 +336,23 @@ function renderSeries(s, ctx = {}) {
   // Labels — `label-position <tag>` implies `label-show true` (a user
   // who positions labels clearly wants them rendered); explicit
   // `label-show false` still wins.
-  if (s.labelShow !== undefined || s.labelPosition !== undefined) {
+  //
+  // For scatter with named points, labels are on by default (mirrors
+  // pie, where slice names always render alongside slices) and the
+  // formatter shows the point's `name` positioned `top` of the symbol
+  // — ECharts' default would otherwise render the `[x, y]` value
+  // overlapping the dot, which isn't what users mean by "named
+  // points". Explicit `label-show false` opts out.
+  const scatterHasNames = s.type === "scatter" && Array.isArray(out.data) &&
+    out.data.some((d) => d && typeof d === "object" && d.name !== undefined);
+  const scatterLabelOnByDefault = scatterHasNames && s.labelShow !== false;
+  if (s.labelShow !== undefined || s.labelPosition !== undefined || scatterLabelOnByDefault) {
     const show = s.labelShow !== undefined ? !!s.labelShow : true;
     const label = { show };
     if (s.labelPosition !== undefined) {
       label.position = mapLabelPosition(s.labelPosition);
     }
-    // For scatter with named points, ECharts' default label formatter
-    // is the value `[x, y]` (rendered as "1,2"), which isn't useful.
-    // Show the point's `name` instead, and default the position to
-    // `top` so the label clears the symbol.
-    if (
-      show && s.type === "scatter" && Array.isArray(out.data) &&
-      out.data.some((d) => d && typeof d === "object" && d.name !== undefined)
-    ) {
+    if (show && scatterHasNames) {
       label.formatter = "{b}";
       if (label.position === undefined) label.position = "top";
     }
@@ -428,11 +431,15 @@ function splitNamedScatterForLegend(series, hasLegend) {
   if (!allNamed) return [series];
   const { data, ...seriesRest } = series;
   return data.map((point) => {
-    const { name, itemStyle, ...pointRest } = point;
+    // Keep `name` on the data point too so a label `formatter "{b}"`
+    // still resolves (ECharts' `{b}` reads the data-point name, not
+    // the series name).
+    const { itemStyle, ...pointWithName } = point;
+    const dataPoint = itemStyle ? { ...pointWithName, itemStyle } : pointWithName;
     const split = {
       ...seriesRest,
-      name,
-      data: [itemStyle ? { ...pointRest, itemStyle } : pointRest],
+      name: point.name,
+      data: [dataPoint],
     };
     if (itemStyle && itemStyle.color !== undefined) {
       split.itemStyle = { ...(seriesRest.itemStyle || {}), color: itemStyle.color };

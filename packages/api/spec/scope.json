@@ -7,10 +7,9 @@
     "Theming (dark / light), named ECharts color palettes, Tailwind v3 color tokens resolved to hex at compile time"
   ],
   "out_of_scope": [
-    "Tabular data renderings (HTML tables) and KPI cards — not in L0173 v1",
     "Relational / network charts (graph, sankey, tree, treemap, sunburst)",
     "Scatter, radar, gauge, heatmap, boxplot, candlestick, funnel — out of scope for v1, slot in later",
-    "Interactive table editing, formulas, or per-cell scoring (use L0166 for spreadsheets)",
+    "Interactive editing, formulas, or per-cell scoring (use L0166 for spreadsheets)",
     "External data fetching (HTTP / file / DB) — programs evaluate against a fixed input",
     "Cross-language composition via import"
   ]

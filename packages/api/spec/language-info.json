@@ -1,6 +1,6 @@
 {
   "id": "0173",
-  "description": "Graffiticode charting dialect. Compiles small declarative programs into Apache ECharts visualizations: bar, line, and pie charts (including donut and nightingale-rose variants via attributes). Single-series constructors (bar, line, pie) double as complete charts; the `chart` wrapper combines multiple series on shared or dual y-axes. Right tool for analytics dashboards and report visualizations. Not the right tool for tabular data renderings, KPI cards, relational/network charts, interactive editing, or anything that needs external data fetching.",
+  "description": "Graffiticode charting dialect. Compiles small declarative programs into Apache ECharts visualizations: bar, line, and pie charts (including donut and nightingale-rose variants via attributes). Single-series constructors (bar, line, pie) double as complete charts; the `chart` wrapper combines multiple series on shared or dual y-axes. Right tool for analytics dashboards and report visualizations. Not the right tool for relational/network charts, interactive editing, or anything that needs external data fetching.",
   "supported_item_types": [
     "chart"
   ],

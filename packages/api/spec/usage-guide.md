@@ -15,17 +15,15 @@ multi-series / dual-axis layout via the `chart` wrapper.
 
 The right tool for analytics dashboards and report visualizations. Not
 the right tool for relational charts (graph / sankey / tree / treemap /
-sunburst), interactive editing, formulas, tabular data renderings, KPI
-cards, or anything that needs external data fetching — those belong
-in other dialects.
+sunburst), interactive editing, formulas, or anything that needs
+external data fetching — those belong in other dialects.
 
 In scope (v1): bar, line, pie (with donut and nightingale-rose
 variants via attributes); multi-series overlays on shared or dual
 y-axes; Tailwind v3 color tokens and theme modes. Out of scope (v1):
 scatter / radar / gauge / heatmap / boxplot / candlestick / funnel /
-network charts / tables / KPI cards — these slot into the same
-compiler pattern in future versions or sibling dialects but aren't
-in L0173 v1.
+network charts — these slot into the same compiler pattern in future
+versions or sibling dialects but aren't in L0173 v1.
 
 ## What L0173 can do
 
@@ -51,8 +49,8 @@ in L0173 v1.
 - No `scatter`, `radar`, `gauge`, `heatmap`, `boxplot`, `candlestick`,
   `funnel` series — these are easy adds in a future v2 but aren't in
   v1.
-- No tables, KPI cards, or other non-ECharts artifact types in v1.
-  Use a different dialect or wait for v2.
+- No non-ECharts artifact types in v1. Use a different dialect or wait
+  for v2.
 - No external data — the program receives no HTTP/database access.
 
 ## Quick start

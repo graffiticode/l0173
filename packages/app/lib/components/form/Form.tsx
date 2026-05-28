@@ -68,8 +68,8 @@ export const Form = ({ state }: { state: any }) => {
         "rounded-md flex flex-col gap-4 p-4"
       )}
     >
-      {Array.isArray(state.data?.errors) && state.data.errors.length > 0
-        ? renderErrors(state.data.errors, theme)
+      {Array.isArray(state.errors) && state.errors.length > 0
+        ? renderErrors(state.errors, theme)
         : render({ state, theme })}
     </div>
   );

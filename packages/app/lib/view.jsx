@@ -6,12 +6,33 @@ import { createState } from "./lib/state";
 import { compile, getData } from './swr/fetchers';
 import './index.css';
 
-function isNonNullNonEmptyObject(obj) {
-  return (
-    typeof obj === "object" &&
-      obj !== null &&
-      Object.keys(obj).length > 0
-  );
+// The compiled data field can be a record, a non-empty array, or a bare value
+// (number, string). Render whenever there is something to show.
+function hasRenderableData(data) {
+  if (data === null || data === undefined) {
+    return false;
+  }
+  if (typeof data === "object") {
+    return Object.keys(data).length > 0;
+  }
+  return true;
+}
+
+// Compile/stored responses use the standard { data, errors } envelope. A
+// response carrying a `data` and/or `errors` field is read as an envelope; a
+// payload with neither (legacy/raw value or host-provided init data) is used
+// as the data model itself.
+function unwrapEnvelope(resp) {
+  if (
+    resp && typeof resp === "object" && !Array.isArray(resp) &&
+    ("data" in resp || "errors" in resp)
+  ) {
+    return {
+      data: resp.data,
+      errors: Array.isArray(resp.errors) ? resp.errors : [],
+    };
+  }
+  return { data: resp, errors: [] };
 }
 
 /*
@@ -56,11 +77,15 @@ export const View = () => {
         ...args,
       };
     case "compiled":
-      // Apply data from compile.
-      return {
-        ...data,
-        ...args,
-      };
+      // A record merges into existing state; a non-record result (number,
+      // string, list) replaces it.
+      if (typeof args === "object" && args !== null && !Array.isArray(args)) {
+        return {
+          ...data,
+          ...args,
+        };
+      }
+      return args;
     case "update":
       const merged = {
         ...data,
@@ -122,10 +147,15 @@ export const View = () => {
   );
 
   if (getDataResp.data) {
-    state.apply({
-      type: "compiled",
-      args: getDataResp.data,
-    });
+    // Stored data uses the same { data, errors } envelope as /compile.
+    const { data, errors } = unwrapEnvelope(getDataResp.data);
+    state.setErrors(errors);
+    if (errors.length === 0 && data !== null && data !== undefined) {
+      state.apply({
+        type: "compiled",
+        args: data,
+      });
+    }
     setDoGetData(false);
   }
 
@@ -139,15 +169,20 @@ export const View = () => {
   );
 
   if (compileResp.data) {
-    state.apply({
-      type: "compiled",
-      args: compileResp.data,
-    });
+    // Unwrap the { data, errors } envelope.
+    const { data, errors } = unwrapEnvelope(compileResp.data);
+    state.setErrors(errors);
+    if (errors.length === 0 && data !== null && data !== undefined) {
+      state.apply({
+        type: "compiled",
+        args: data,
+      });
+    }
     setDoCompile(false);
   }
 
   return (
-    isNonNullNonEmptyObject(state.data) &&
+    (hasRenderableData(state.data) || state.errors.length > 0) &&
       <Form state={state} /> ||
       <div />
   );

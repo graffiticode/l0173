@@ -6,17 +6,15 @@ export async function compile({ auth, authToken, code, data, config }) {
   if (!code || !data) {
     throw new Error('Missing required parameters: code and data');
   }
-  return await new Promise((resolve, reject) =>
-    compiler.compile(code, data, config, (err, data) => {
-      // console.log(
-      //   "compile()",
-      //   "data=" + JSON.stringify(data, null, 2),
-      // );
-      if (err && err.length) {
-        resolve({errors: err});
-      } else {
-        resolve(data);
-      }
+  return await new Promise((resolve) =>
+    compiler.compile(code, data, config, (err, val) => {
+      // Standard compile response envelope: success output in `data`, compile
+      // errors in `errors` (always an array).
+      const errors = err && err.length ? err : [];
+      resolve({
+        data: errors.length ? null : val,
+        errors,
+      });
     })
   );
 }

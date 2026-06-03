@@ -89,6 +89,28 @@ describe("L0173 / bar", () => {
     expect(errors).not.toBeNull();
     expect(errors[0].message).toMatch(/Invalid label-position/);
   });
+
+  it("label-formatter sets the ECharts template and implies label-show true", async () => {
+    const { errors, data } = await compileSource(`bar label-formatter "{c}%" values [10, 20] {}..`);
+    expect(errors).toBeNull();
+    expect(data.option.series[0].label).toEqual({ show: true, formatter: "{c}%" });
+  });
+
+  it("label-formatter combines with label-position", async () => {
+    const { errors, data } = await compileSource(
+      `bar label-position top label-formatter "${"$"}{c}" values [10, 20] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.series[0].label).toEqual({ show: true, position: "top", formatter: "${c}" });
+  });
+
+  it("explicit label-show false suppresses labels even with label-formatter", async () => {
+    const { errors, data } = await compileSource(
+      `bar label-formatter "{c}%" label-show false values [10, 20] {}..`
+    );
+    expect(errors).toBeNull();
+    expect(data.option.series[0].label).toEqual({ show: false, formatter: "{c}%" });
+  });
 });
 
 describe("L0173 / line", () => {

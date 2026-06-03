@@ -66,6 +66,7 @@ These setters chain inside any series constructor.
 | `symbol-size` | number | Symbol size in pixels. |
 | `label-show` | boolean | Show data labels on each point / bar / slice. |
 | `label-position` | tag (`top` \| `inside` \| `bottom` \| `inside-top` \| `inside-bottom`) | Where to render the data label. Implies `label-show true` unless `label-show false` is also set. |
+| `label-formatter` | string | Template for formatting label values. Tokens: `{c}` data value, `{b}` data name, `{a}` series name, `{d}` percent (pie). E.g. `"{c}%"`, `"${c}"`, `"{b}: {c}"`. Implies `label-show true` unless `label-show false` is also set. |
 | `outer-radius` | string or number | (pie) Outer radius (default `"75%"`). |
 | `inner-radius` | string or number | (pie) Inner radius — non-zero values produce a donut chart. |
 | `rose-type` | tag (`radius` \| `area`) | (pie) Nightingale rose. |
@@ -214,7 +215,8 @@ scatter
 When a scatter has named points, each point is labeled with its
 `name` by default (positioned `top`, clear of the symbol) — mirroring
 how `pie` always shows slice names alongside slices. To opt out, set
-`label-show false`. Explicit `label-position` always wins.
+`label-show false`. Explicit `label-position` always wins, and an
+explicit `label-formatter` overrides the default `name` label.
 
 The legend reflects *series* identity, not point identity — adding
 `legend top` to a single scatter without a series `name` won't

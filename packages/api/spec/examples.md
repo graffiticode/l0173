@@ -126,3 +126,15 @@ fetch/transform the upstream must perform (filter, sort, top-N, group, join).
 90. Line chart of a company's daily closing price over the last 30 days — fetch the public price series and plot date against close.
 91. Bar chart of average rainfall by month for a city — fetch public weather data and group by month to compute the average. Title "Monthly rainfall".
 92. Scatter plot of GDP per capita versus life expectancy by country — fetch and join public economic and health datasets, one point per country.
+
+## Category 9: Label value formatting (93–97)
+
+These prompts format the *values* shown in data labels via `label-formatter`,
+an ECharts template string (`{c}` value, `{b}` name, `{a}` series name,
+`{d}` percent for pie). Setting it implies `label-show true`.
+
+93. Bar chart of quarterly revenue with each bar labeled as a percentage, e.g. "45%" (label-formatter "{c}%").
+94. Bar chart of prices with data labels formatted as US dollars like "$320" (label-formatter "${c}").
+95. Pie chart of market share with each slice labeled as "name: percent", e.g. "Chrome: 64%" (label-formatter "{b}: {d}%").
+96. Line chart with point labels showing the value followed by a unit, e.g. "27°C" (label-formatter "{c}°C").
+97. Donut chart of budget allocation with slices labeled by percent only (label-formatter "{d}%").

@@ -109,6 +109,7 @@ writing ECharts config will fail. Map them to L0173 keywords first.
 | `label { position: "top" }` | `label-position top` — a flat setter. Setting `label-position` implies `label-show true`. |
 | `label show true` (decomposing `label`) | `label-show true` — it's a single hyphenated keyword. |
 | `label { show: true position: "top" }` (record-literal options) | `label-show true` only. Per-point label position is not exposed in v1. |
+| `label { formatter: "{c}%" }` or `label: { formatter: function(p){...} }` | `label-formatter "{c}%"` — a flat setter taking an ECharts template string (`{c}` value, `{b}` name, `{d}` percent). Function formatters are not supported. Implies `label-show true`. |
 | `option { title: { text: "..." } ... }` (JSON-literal config) | Use the chainable setters: `title "..."`, `subtitle "..."`, etc. No `option` keyword. |
 | `xAxis { type: "category" data: [...] }` (JSON-literal axis) | `x-axis type category categories [...] {}` — the axis is its own chainable block. |
 | `axisLabel: { rotate: 45 }` (rotate long tick labels) | `rotate 45` *inside* the `x-axis` / `y-axis` chain — flat setter, value in degrees. |

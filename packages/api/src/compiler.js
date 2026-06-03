@@ -333,9 +333,15 @@ function renderSeries(s, ctx = {}) {
   if (s.symbol !== undefined) out.symbol = s.symbol;
   if (s.symbolSize !== undefined) out.symbolSize = s.symbolSize;
   if (s.areaStyle !== undefined) out.areaStyle = s.areaStyle === true ? {} : s.areaStyle;
-  // Labels — `label-position <tag>` implies `label-show true` (a user
-  // who positions labels clearly wants them rendered); explicit
-  // `label-show false` still wins.
+  // Labels — `label-position <tag>` and `label-formatter <string>` both
+  // imply `label-show true` (a user who positions or formats labels
+  // clearly wants them rendered); explicit `label-show false` still wins.
+  //
+  // `label-formatter` is an ECharts template string: `{c}` is the data
+  // value, `{b}` the data name, `{a}` the series name, `{d}` the percent
+  // (pie). It's how users format label *values* — e.g. `"{c}%"`,
+  // `"${c}"`, `"{b}: {c}"`. A user-supplied formatter always wins over
+  // the scatter `{b}` default below.
   //
   // For scatter with named points, labels are on by default (mirrors
   // pie, where slice names always render alongside slices) and the
@@ -346,15 +352,22 @@ function renderSeries(s, ctx = {}) {
   const scatterHasNames = s.type === "scatter" && Array.isArray(out.data) &&
     out.data.some((d) => d && typeof d === "object" && d.name !== undefined);
   const scatterLabelOnByDefault = scatterHasNames && s.labelShow !== false;
-  if (s.labelShow !== undefined || s.labelPosition !== undefined || scatterLabelOnByDefault) {
+  if (
+    s.labelShow !== undefined || s.labelPosition !== undefined ||
+    s.labelFormatter !== undefined || scatterLabelOnByDefault
+  ) {
     const show = s.labelShow !== undefined ? !!s.labelShow : true;
     const label = { show };
     if (s.labelPosition !== undefined) {
       label.position = mapLabelPosition(s.labelPosition);
     }
-    if (show && scatterHasNames) {
+    if (s.labelFormatter !== undefined) {
+      label.formatter = s.labelFormatter;
+    } else if (show && scatterHasNames) {
       label.formatter = "{b}";
-      if (label.position === undefined) label.position = "top";
+    }
+    if (label.position === undefined && show && scatterHasNames) {
+      label.position = "top";
     }
     out.label = label;
   }

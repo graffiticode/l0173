@@ -52,6 +52,7 @@ const OPT_SETTERS = {
   SYMBOL_SIZE:     "symbolSize",
   LABEL_SHOW:      "labelShow",
   LABEL_POSITION:  "labelPosition",
+  LABEL_FORMATTER: "labelFormatter",
   AXIS:            "axis",
   OUTER_RADIUS:    "radius",
   INNER_RADIUS:    "innerRadius",

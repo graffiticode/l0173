@@ -58,6 +58,23 @@ function unwrapEnvelope(resp) {
 */
 
 export const View = () => {
+
+  // Report content height to an embedding parent (e.g. the MCP/ChatGPT inline
+  // widget iframe) so it can size the iframe to the form instead of a fixed
+  // guess. Posts to "*" because the embedding widget is often a sandboxed
+  // origin; the parent validates event.source. Learnosity relayouts async, so a
+  // ResizeObserver keeps the height live.
+  useEffect(() => {
+    if (typeof window === "undefined" || window.parent === window) return;
+    const postHeight = () => {
+      const h = document.body.scrollHeight;
+      if (h > 0) window.parent.postMessage({ type: "resize", height: h }, "*");
+    };
+    const ro = new ResizeObserver(postHeight);
+    ro.observe(document.body);
+    postHeight();
+    return () => ro.disconnect();
+  }, []);
   const params = new URLSearchParams(window.location.search);
   const [ id, setId ] = useState(params.get("id"));
   const [ accessToken, setAccessToken ] = useState(params.get("access_token"));

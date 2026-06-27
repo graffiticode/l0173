@@ -4,13 +4,13 @@
   "in_scope": [
     "Bar, line, and pie chart series (pie includes donut via inner-radius and nightingale rose via rose-type)",
     "Multi-series compositions and dual y-axis layouts via the `chart` wrapper",
-    "Theming (dark / light), named ECharts color palettes, Tailwind v3 color tokens resolved to hex at compile time"
+    "Theming (dark / light), named ECharts color palettes, Tailwind v3 color tokens resolved to hex at compile time",
+    "Plotting data given inline, OR data bound from an upstream data-sourcing dialect (L0170) via the `data` primitive — so a chart request whose values must be fetched from the web or transformed is in scope and composes with L0170"
   ],
   "out_of_scope": [
     "Relational / network charts (graph, sankey, tree, treemap, sunburst)",
     "Scatter, radar, gauge, heatmap, boxplot, candlestick, funnel — out of scope for v1, slot in later",
     "Interactive editing, formulas, or per-cell scoring (use L0166 for spreadsheets)",
-    "External data fetching (HTTP / file / DB) — programs evaluate against a fixed input",
-    "Cross-language composition via import"
+    "Fetching or transforming external data ITSELF — L0173 renders values given inline or bound from an upstream data-sourcing dialect (L0170); it does not fetch or reshape data on its own (compose with L0170 for that)"
   ]
 }

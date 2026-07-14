@@ -9,9 +9,15 @@ composing a `create_item` prompt or an `update_item` modification.
 L0173 is a declarative dialect for **charts**. Input is a natural-language
 description of a visualization — what kind of chart, the data series,
 axis labels, theming — and output is an L0173 program that compiles to
-an Apache ECharts canvas: a bar, line, or pie chart (including donut
-and nightingale-rose variants), used standalone or composed into a
+an Apache ECharts canvas: a bar, line, pie, or scatter chart (including
+donut and nightingale-rose variants), used standalone or composed into a
 multi-series / dual-axis layout via the `chart` wrapper.
+
+Syntax rule that trips up most first attempts: `{}` terminates an entire
+setter chain — one per constructor (`chart` / `bar` / `line` / `pie` /
+`scatter`, closed just before `..`) and one per record-valued setter
+(`x-axis`, `y-axis`, `y-axis-right`). Scalar setters like `title`,
+`values`, and `color` never take a `{}` of their own.
 
 The right tool for analytics dashboards and report visualizations. Not
 the right tool for relational charts (graph / sankey / tree / treemap /
@@ -19,9 +25,9 @@ sunburst), interactive editing, formulas, or anything that needs
 external data fetching — those belong in other dialects.
 
 In scope (v1): bar, line, pie (with donut and nightingale-rose
-variants via attributes); multi-series overlays on shared or dual
-y-axes; Tailwind v3 color tokens and theme modes. Out of scope (v1):
-scatter / radar / gauge / heatmap / boxplot / candlestick / funnel /
+variants via attributes), scatter; multi-series overlays on shared or
+dual y-axes; Tailwind v3 color tokens and theme modes. Out of scope
+(v1): radar / gauge / heatmap / boxplot / candlestick / funnel /
 network charts — these slot into the same compiler pattern in future
 versions or sibling dialects but aren't in L0173 v1.
 
@@ -41,14 +47,15 @@ versions or sibling dialects but aren't in L0173 v1.
   chrome; named ECharts palettes via `palette "vintage"` etc.
 - **Tailwind color tokens** — `color "blue-500"` resolves to the
   Tailwind hex at compile time.
+- **Scatter plots** — XY point clouds from `[x, y]` pairs or
+  `{x, y, name?}` records; named points are labeled automatically.
 
 ## What L0173 cannot do (v1)
 
 - No network / relational charts: `graph`, `sankey`, `tree`, `treemap`,
   `sunburst` are not implemented.
-- No `scatter`, `radar`, `gauge`, `heatmap`, `boxplot`, `candlestick`,
-  `funnel` series — these are easy adds in a future v2 but aren't in
-  v1.
+- No `radar`, `gauge`, `heatmap`, `boxplot`, `candlestick`, `funnel`
+  series — these are easy adds in a future v2 but aren't in v1.
 - No non-ECharts artifact types in v1. Use a different dialect or wait
   for v2.
 - No external data — the program receives no HTTP/database access.
@@ -59,7 +66,7 @@ A bar chart:
 ```
 bar
   title "Sales"
-  x-axis category ["Q1","Q2","Q3","Q4"] {}
+  x-axis type category categories ["Q1","Q2","Q3","Q4"] {}
   values [320, 450, 380, 510]
   color "blue-500"
   {}..
@@ -69,7 +76,7 @@ A multi-series chart with dual y-axis:
 ```
 chart
   title "Revenue vs growth rate"
-  x-axis category ["Q1","Q2","Q3","Q4"] {}
+  x-axis type category categories ["Q1","Q2","Q3","Q4"] {}
   y-axis name "USD (thousands)" {}
   y-axis-right name "% growth" min -10 max 20 {}
   series [

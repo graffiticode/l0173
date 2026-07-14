@@ -52,11 +52,11 @@ export const postApiCompile = async ({ accessToken, id, data }) => {
     const apiUrl = getApiUrl();
     const post = bent(apiUrl, "POST", "json", headers);
     const body = { id, data };
-    const resp = await post('/compile', body);
-    if (resp.status !== "success") {
-      throw new Error(`failed to post compile ${id}: ${error.message}`);
+    const { status, error, data: respData } = await post('/compile', body);
+    if (status !== "success") {
+      throw new Error(`failed to post compile ${id}: ${error?.message ?? error}`);
     }
-    return resp.data;
+    return respData;
   } catch (err) {
     console.log("L0173/postApiCompile() err=" + err);
     throw err;

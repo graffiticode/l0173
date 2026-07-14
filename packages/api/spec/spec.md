@@ -118,7 +118,7 @@ list of `{ name, value }` records.
 ```
 bar
   title "Quarterly revenue"
-  x-axis category ["Q1", "Q2", "Q3", "Q4"] {}
+  x-axis type category categories ["Q1", "Q2", "Q3", "Q4"] {}
   values [320, 450, 380, 510]
   color "blue-500"
   {}
@@ -131,7 +131,7 @@ Line chart. `values` is a list of numbers or `[x, y]` pairs.
 ```
 line
   title "Daily users"
-  x-axis category ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] {}
+  x-axis type category categories ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] {}
   values [1200, 1340, 1500, 1450, 1700, 1850, 1900]
   smooth true
   symbol circle
@@ -245,7 +245,7 @@ and `y-axis-right` at the chart level, and bind each series with the
 
 ```
 chart
-  x-axis category ["Q1","Q2","Q3","Q4"] {}
+  x-axis type category categories ["Q1","Q2","Q3","Q4"] {}
   y-axis  type value name "USD (thousands)" {}
   y-axis-right type value name "% growth" min -10 max 20 {}
   series [
@@ -270,7 +270,7 @@ Single-series bar with title:
 ```
 bar
   title "Sales"
-  x-axis category ["Q1","Q2","Q3","Q4"] {}
+  x-axis type category categories ["Q1","Q2","Q3","Q4"] {}
   values [320, 450, 380, 510]
   {}..
 ```

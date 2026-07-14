@@ -543,3 +543,62 @@ describe("L0173 / theme", () => {
     expect(errors[0].message).toMatch(/Invalid theme/);
   });
 });
+
+describe("L0173 / misplaced `{}`", () => {
+  // `{}` is the empty-record literal that terminates a setter chain. Placed
+  // mid-chain it satisfies the current setter's second argument, completing the
+  // constructor and silently starting a *second* top-level expression — the
+  // chart is dropped and the leftover fragment becomes the program's value.
+  it("rejects a `{}` that closes a series chain early", async () => {
+    const { errors, data } = await compileSource(`bar name "Quarterly Sales"
+  title "Quarterly Sales" {}
+x-axis type category
+  categories ["Q1", "Q2"] {}
+  y-axis type value {}
+  values [10, 20] {}..`);
+    expect(errors).not.toBeNull();
+    expect(errors[0].message).toMatch(/top-level expressions/);
+    expect(errors[0].message).toMatch(/`\{\}`/);
+    expect(data).toBeUndefined();
+  });
+
+  it("reports the source position where the program was split", async () => {
+    const { errors } = await compileSource(`bar title "T" {} values [1, 2] {}..`);
+    expect(errors).not.toBeNull();
+    // Points at the `values` fragment orphaned by the stray `{}`.
+    expect(errors[0].from).toBeGreaterThan(0);
+  });
+
+  it("rejects a `{}` that closes a chart chain early", async () => {
+    const { errors } = await compileSource(`chart title "T" {} series [bar values [1, 2] {}] {}..`);
+    expect(errors).not.toBeNull();
+    expect(errors[0].message).toMatch(/top-level expressions/);
+  });
+
+  it("rejects a top-level expression that isn't a chart", async () => {
+    const { errors } = await compileSource(`title "T" values [1, 2] {}..`);
+    expect(errors).not.toBeNull();
+    expect(errors[0].message).toMatch(/must produce a chart/);
+    expect(errors[0].message).toMatch(/`title`/);
+  });
+
+  it("accepts the corrected program", async () => {
+    const { errors, data } = await compileSource(`bar
+  name "Quarterly Sales"
+  title "Quarterly Sales"
+  x-axis type category categories ["Q1", "Q2"] {}
+  y-axis type value {}
+  values [10, 20]
+  {}..`);
+    expect(errors).toBeNull();
+    expect(data.type).toBe("chart");
+    expect(data.option.xAxis).toEqual({ type: "category", data: ["Q1", "Q2"] });
+    expect(data.option.series[0]).toMatchObject({ type: "bar", name: "Quarterly Sales", data: [10, 20] });
+  });
+
+  it("still passes `print` output through", async () => {
+    const { errors, data } = await compileSource(`print "hi"..`);
+    expect(errors).toBeNull();
+    expect(data.print).toBe("hi");
+  });
+});

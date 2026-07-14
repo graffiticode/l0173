@@ -28,9 +28,41 @@ into a multi-series / dual-axis layout via the `chart` wrapper.
   for multiple series on the same canvas.
 - Inside `series [...]`, only series-producing constructors are valid:
   `bar`, `line`, `pie`, `scatter`.
-- All chainable attributes end with `{}` (the empty record).
 - Use commas between list items in records; lists of constructors in
   `series [bar... {}, line... {}]` need commas between items.
+
+## Where `{}` goes — read this before writing any program
+
+`{}` is the empty record that **terminates a whole setter chain**. It is
+*not* punctuation that follows each setter. Getting this wrong is the
+single most common way to produce a broken program.
+
+**One `{}` per record**, and there are exactly two kinds of record:
+
+1. A constructor — `chart`, `bar`, `line`, `pie`, `scatter`. Its `{}`
+   comes after *all* of its setters. On a top-level constructor that
+   `{}` is immediately followed by the program terminator `..`.
+2. A record-valued setter — `x-axis`, `y-axis`, `y-axis-right`. Each
+   opens a nested record and closes it with its own `{}`.
+
+**Every other setter** — `title`, `subtitle`, `name`, `values`, `color`,
+`legend`, `tooltip`, `smooth`, `stack`, `label-show`, `symbol`, … — takes
+a plain value and gets **no `{}` of its own**.
+
+```
+bar                                              <- constructor: opens a record
+  name "Revenue"                                 <- scalar setter: no {}
+  title "Quarterly Sales"                        <- scalar setter: no {}
+  x-axis type category categories ["Q1","Q2"] {} <- nested record: its own {}
+  y-axis type value {}                           <- nested record: its own {}
+  values [10, 20]                                <- scalar setter: no {}
+{}..                                             <- closes `bar`, then `..`
+```
+
+A `{}` in the wrong place does **not** produce a syntax error — it
+silently ends the chart early and starts a second, unrelated expression,
+which throws the chart away. The compiler now rejects this, but the fix
+is to place `{}` correctly in the first place.
 
 ## Data shapes
 
@@ -99,9 +131,10 @@ explicitness.
 
 ## ECharts idioms that don't translate to L0173
 
-L0173 is **not** ECharts JSON. It's a prefix-applied DSL with chainable
-arity-2 attribute setters that end in `{}`. Several reflexes from
-writing ECharts config will fail. Map them to L0173 keywords first.
+L0173 is **not** ECharts JSON. It's a prefix-applied DSL whose chainable
+arity-2 attribute setters build one record, terminated by `{}`. Several
+reflexes from writing ECharts config will fail. Map them to L0173
+keywords first.
 
 | What you might write (ECharts reflex) | What L0173 expects |
 | :--- | :--- |
@@ -124,8 +157,31 @@ writing ECharts config will fail. Map them to L0173 keywords first.
 
 ## Common pitfalls
 
-- **Forgetting the inner `{}`** for an x-axis / y-axis / series block.
-  Every chainable record terminates with `{}`.
+- **An extra `{}` mid-chain** — the most common failure. A `{}` after a
+  scalar setter closes the constructor's record there, so everything after
+  it parses as a separate top-level expression and the chart is discarded.
+
+  Wrong — the `{}` after `title` ends the `bar` chart; the axes and values
+  that follow become an orphaned fragment:
+  ```
+  bar name "Quarterly Sales"
+    title "Quarterly Sales" {}
+  x-axis type category categories ["Q1","Q2","Q3","Q4"] {}
+    y-axis type value {}
+    values [10, 20, 15, 25] {}..
+  ```
+  Right — one `{}` closes each axis record, one closes the `bar` chain:
+  ```
+  bar
+    name "Quarterly Sales"
+    title "Quarterly Sales"
+    x-axis type category categories ["Q1","Q2","Q3","Q4"] {}
+    y-axis type value {}
+    values [10, 20, 15, 25]
+    {}..
+  ```
+- **Forgetting the inner `{}`** for an x-axis / y-axis / series block —
+  each of those opens a nested record and must close it.
 - **Mixing chart-level options inside a `series [...]` item** —
   `title`, `legend`, etc. are chart-level. Put them on the wrapper
   (or on a standalone series constructor; the compiler hoists them).

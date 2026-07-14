@@ -480,34 +480,105 @@ Transformer.prototype.SCATTER = function (node, options, resume) {
 // PROG — top-level assembly
 // ---------------------------------------------------------------------------
 
+// A program is one expression. Because every setter is arity-2 and takes the
+// record it extends as its second argument, a `{}` anywhere but the end of a
+// chain terminates that chain early — the remaining setters then parse as a
+// *second*, perfectly well-formed top-level expression. Without this check the
+// early-closed chart is silently dropped (PROG keeps only the last expression)
+// and the leftover fragment is returned as a bare record.
+const CONSTRUCTOR_TAGS = new Set([
+  "CHART", ...SERIES_TYPE_NAMES.map((t) => t.toUpperCase()),
+]);
+
+Checker.prototype.PROG = function (node, options, resume) {
+  this.visit(node.elts[0], options, (e0) => {
+    const errs = [...(e0 || [])];
+    const exprs = this.nodePool[node.elts[0]];
+    const elts = (exprs && exprs.elts) || [];
+    if (elts.length > 1) {
+      const stray = this.nodePool[elts[1]];
+      const strayChart = CONSTRUCTOR_TAGS.has(this.nodePool[elts[0]]?.tag);
+      const cause = strayChart
+        ? "A `{}` closed the setter chain early, ending the chart here and starting a new expression. "
+        : "";
+      errs.push({
+        message:
+          `Program has ${elts.length} top-level expressions; expected 1. ${cause}` +
+          "`{}` terminates a whole setter chain — one per `chart` / series constructor, " +
+          "and one per record-valued setter (`x-axis`, `y-axis`, `y-axis-right`). It does " +
+          "not follow each setter. Write `bar title \"Sales\" values [1, 2] {}..`, not " +
+          "`bar title \"Sales\" {} values [1, 2] {}..`.",
+        from: stray?.coord?.from ?? -1,
+        to: stray?.coord?.to ?? -1,
+      });
+    }
+    resume(errs, node);
+  });
+};
+
 Transformer.prototype.PROG = function (node, options, resume) {
   this.visit(node.elts[0], options, (e0, v0) => {
     const data = options?.data || {};
     const items = Array.isArray(v0) ? v0 : [v0];
     const last = items[items.length - 1];
 
-    if (!last || typeof last !== "object") {
-      resume(e0, { ...data, value: last });
-      return;
-    }
-
     // Already a chart envelope — pass through.
-    if (last.type === "chart") {
+    if (last && last.type === "chart") {
       resume(e0, { ...data, ...last });
       return;
     }
 
     // Bare series at top level (no `chart` wrapper) — auto-wrap.
-    if (SERIES_TYPE_NAMES.includes(last.type)) {
+    if (last && SERIES_TYPE_NAMES.includes(last.type)) {
       const { type, ...rest } = last;
       resume(e0, { ...data, ...assembleEnvelope(rest, type) });
       return;
     }
 
-    // `print` debug output and anything else — pass through.
-    resume(e0, { ...data, ...last });
+    // `print` debug output — pass through.
+    if (last && typeof last === "object" && last.print !== undefined) {
+      resume(e0, { ...data, ...last });
+      return;
+    }
+
+    // Anything else isn't renderable. Previously this fell through to a
+    // silent `{...data, ...last}` pass-through, and the viewer dumped the
+    // raw object as JSON with no indication anything was wrong. The usual
+    // cause is a chain that never reached a constructor — e.g. a stray `{}`
+    // left `x-axis ... {}` as the top-level expression.
+    resume([...(e0 || []), {
+      message:
+        `Program must produce a chart. The top-level expression evaluated to ` +
+        `${describeTopLevel(last)}, not a \`chart\` / \`bar\` / \`line\` / \`pie\` / \`scatter\`. ` +
+        "Check for a misplaced `{}`: it terminates a whole setter chain, not each setter.",
+      from: -1,
+      to: -1,
+    }], { ...data, ...(last && typeof last === "object" ? last : { value: last }) });
   });
 };
+
+// Name the shape a non-chart top-level expression produced, so the error can
+// say *what* it got. Records report their keys — that's what identifies the
+// orphaned fragment (`xAxis`, `values`, …) to whoever has to fix the program.
+function describeTopLevel(v) {
+  if (v === undefined || v === null) return "nothing";
+  if (Array.isArray(v)) return "a list";
+  if (typeof v === "object") {
+    // A record literal still carries basis's internal `{_type, _entries}`
+    // representation at this phase (the Renderer flattens it later). Report the
+    // authored keys, not the plumbing.
+    const keys = Object.keys(v).filter((k) => !k.startsWith("_"));
+    if (v._entries instanceof Map) {
+      for (const encoded of v._entries.keys()) {
+        keys.push(encoded.substring(encoded.indexOf(":") + 1));
+      }
+    }
+    return keys.length
+      ? `a record with ${keys.map((k) => "`" + k + "`").join(", ")}`
+      : "an empty record";
+  }
+  return `the ${typeof v} ${JSON.stringify(v)}`;
+}
 
 // Pass-through PRINT helper (basis already handles it; keep for parity
 // with the cloned scaffold).

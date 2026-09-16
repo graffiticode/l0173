@@ -12,14 +12,11 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: resolve(import.meta.dirname, "./lib/index.ts"),
+      entry: resolve(__dirname, "./lib/index.ts"),
       name: "react-form",
       fileName: (format) => `index.${format}.js`,
-      // Vite 6+ names the extracted lib stylesheet after the package; the api imports
-      // ../../app/dist/style.css and the package exports ./style.css, so pin the name.
-      cssFileName: "style",
     },
-    rolldownOptions: {
+    rollupOptions: {
       external: [
         "react",
         "react-dom",

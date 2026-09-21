@@ -108,24 +108,27 @@ produce a valid L0173 program.
 81. Scatter of cycle times in minutes for twelve tasks (values ranging 7–15) plus a least-squares best-fit line. Diamond symbols size 12, dark theme.
 82. Temperature scatter [(1, 22), (2, 24), (3, 21), (4, 25), (5, 27), (6, 29), (7, 28)] with a best-fit line named "trend" drawn across the same axes. Dark theme, legend top, line in amber-500.
 
-## Category 8: Composed charts from fetched & transformed data (83–92)
+## Category 8: Composed charts from fetched & transformed data (83–92) — retired
 
-These prompts ask for a chart whose data comes from the public web. The
-chart (L0173) is the head task; an upstream data task (L0170) fetches and
-transforms the data, and the chart reads it via `data` (declare the upstream
-with `data use "0170"`). Each prompt names the chart shape *and* the
-fetch/transform the upstream must perform (filter, sort, top-N, group, join).
+Retired 2026-09-21. These prompts had the chart bind to an upstream L0170
+data task (`data use "0170"`) that fetched and transformed public data. The
+platform removed the L0173 → L0170 composition edge on 2026-09-10 (console
+commit 1d4ba04), so the scope gate now reroutes these requests to L0170, which
+refuses them because it can't draw charts. Labels 83–92 are left unused so the
+other labels keep matching the items already generated from them.
 
-83. Create a bar chart of the ten biggest economies by GDP. Fetch and filter public GDP data.
-84. Bar chart of the top 10 countries by population — fetch public population data, sort descending, and take the top ten. Color emerald-500.
-85. Line chart of world population by year — fetch the public time series and plot year on the x-axis against population.
-86. Pie chart of the global energy mix by source — fetch public energy data and show each source's share of the total.
-87. Bar chart of the five most populous cities — fetch public city data, sort by population, and take the top five. Title "Largest cities".
-88. Donut chart of desktop browser market share — fetch the latest public market-share data and show each browser as a slice.
-89. Bar chart of CO₂ emissions for the eight highest-emitting countries — fetch public emissions data, sort descending, and take the top eight. Color slate-700.
-90. Line chart of a company's daily closing price over the last 30 days — fetch the public price series and plot date against close.
-91. Bar chart of average rainfall by month for a city — fetch public weather data and group by month to compute the average. Title "Monthly rainfall".
-92. Scatter plot of GDP per capita versus life expectancy by country — fetch and join public economic and health datasets, one point per country.
+Conditions for restoring them (recover the prompts from git history):
+- The console lists L0173 as composing with L0170 again
+  (`composesWith: ["0170"]` in `src/lib/languages.ts`) and says so in the
+  catalog routing hint, which currently states L0173 does not fetch data.
+- `instructions.md` has a pipeline-composition section telling the generator
+  when to emit `data use "0170"` and how to bind the upstream's shape to
+  `values`/`categories` (L0176's "Pipeline Composition" section is the model).
+  Composition is reactive: only a binding the head itself emits pulls in an
+  upstream.
+- `scope.json` lists fetched/transformed data as in scope via L0170 again.
+- The prompts pass end to end through `create_item`, with the upstream getting
+  only its share of the request.
 
 ## Category 9: Label value formatting (93–97)
 
